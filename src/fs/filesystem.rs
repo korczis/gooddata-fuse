@@ -131,7 +131,8 @@ impl Filesystem for GoodDataFS {
         match ino {
             fs::constants::INODE_PROJECTS_JSON => {
                 let json = format!("{}\n",
-                                   json::as_pretty_json(&self.client.projects()).to_string());
+                                   json::as_pretty_json(&self.client.projects().clone())
+                                       .to_string());
                 // let json: String = fs.client.projects().clone().unwrap().into();
                 reply.data(&json.as_bytes()[offset as usize..]);
             }

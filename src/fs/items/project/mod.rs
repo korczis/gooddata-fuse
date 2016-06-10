@@ -145,10 +145,7 @@ pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
             let attr = create_inode_directory_attributes(ino);
             reply.attr(&constants::DEFAULT_TTL, &attr);
         } else if inode.category == constants::Category::MetadataReports as u8 {
-            println!("fs::project::getattr() - METADATA REPORTS");
-
             if inode.reserved == constants::ReservedFile::KeepMe as u8 {
-                println!("KEEP ME!!!");
                 let attr = create_inode_directory_attributes(ino);
                 reply.attr(&constants::DEFAULT_TTL, &attr);
             } else {
@@ -352,7 +349,40 @@ pub fn lookup(fs: &mut GoodDataFS, _req: &Request, parent: u64, name: &Path, rep
         }
         Some(constants::USER_PERMISSIONS_JSON_FILENAME) => permissions_json(fs, &inode, reply),
         Some(constants::USER_ROLES_JSON_FILENAME) => roles_json(fs, &inode, reply),
-        _ => reply.error(ENOENT),
+        _ => {
+            if inode.category == constants::Category::MetadataReports as u8 &&
+               inode.reserved == constants::ReservedFile::KeepMe as u8 {
+                let identifier = name.to_str().unwrap().replace(".json", "");
+                println!("fs::project::lookup() - Looking up parent {} - {:?}, name: {:?}, \
+                          identifier: {:?}",
+                         parent,
+                         inode,
+                         name,
+                         identifier);
+
+                let pid = (inode.project - 1) as usize;
+                let project: &object::Project = &fs.client().projects().as_ref().unwrap()[pid]
+                    .clone();
+
+                let (index, report) = project.reports(&mut fs.client.connector)
+                    .find_by_identifier(&identifier);
+                println!("{:?}", report);
+
+                let inode = inode::Inode {
+                    project: inode.project,
+                    category: constants::Category::MetadataReports as u8,
+                    item: index,
+                    reserved: 1,
+                };
+                let json: String = report.unwrap().into();
+                let attr = create_inode_file_attributes(inode::Inode::serialize(&inode),
+                                                        json.len() as u64,
+                                                        constants::DEFAULT_CREATE_TIME);
+                reply.entry(&constants::DEFAULT_TTL, &attr, 0);
+            } else {
+                reply.error(ENOENT)
+            }
+        }
     }
 }
 
@@ -532,9 +562,7 @@ pub fn readdir(fs: &mut GoodDataFS,
         x if x == constants::Category::MetadataReports as u8 => {
             let pid = (inode.project - 1) as usize;
             let project: &object::Project = &fs.client().projects().as_ref().unwrap()[pid].clone();
-            let report_items =
-                project.get_metadata::<object::ObjectsReport>(&mut fs.client.connector,
-                                                              "report".to_string());
+            let report_items = project.reports(&mut fs.client.connector);
 
             if offset == 0 {
                 for item in report_items.objects.items.into_iter() {

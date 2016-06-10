@@ -79,4 +79,8 @@ impl Project {
 
         json::decode::<T>(&raw).unwrap()
     }
+
+    pub fn reports(&self, client: &mut Connector) -> ObjectsReport {
+        self.get_metadata::<ObjectsReport>(client, "report".to_string())
+    }
 }

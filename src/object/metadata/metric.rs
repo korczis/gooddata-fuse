@@ -1,4 +1,4 @@
-use rustc_serialize::json;
+// use rustc_serialize::json;
 
 
 #[allow(non_snake_case)]
@@ -12,8 +12,7 @@ pub struct MetricTreePosition {
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
 pub struct MetricTreeNode {
     pub content: Option<Vec<MetricTreeNode>>,
-    pub position: MetricTreePosition,
-    // pub type: Option<String>,
+    pub position: MetricTreePosition, // pub type: Option<String>,
 }
 
 #[allow(non_snake_case)]
