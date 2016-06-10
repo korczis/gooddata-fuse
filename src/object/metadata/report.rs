@@ -32,11 +32,11 @@ pub struct ReportContent {
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
 pub struct ReportBody {
     pub content: ReportContent,
-    pub meta: ReportMeta,
+    pub meta: super::MetadataMeta,
 }
 
 impl ReportBody {
-    pub fn meta(&self) -> &ReportMeta {
+    pub fn meta(&self) -> &super::MetadataMeta {
         &self.meta
     }
 }
@@ -67,7 +67,7 @@ pub struct ReportPaging {
 
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
 pub struct ObjectsReportBody {
-    pub paging: ReportPaging,
+    pub paging: super::MetadataPaging,
     pub items: Vec<Report>,
 }
 

@@ -1,6 +1,3 @@
-// use rustc_serialize::json;
-
-
 #[allow(non_snake_case)]
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
 pub struct MetricTreePosition {
@@ -15,22 +12,6 @@ pub struct MetricTreeNode {
     pub position: MetricTreePosition, // pub type: Option<String>,
 }
 
-#[allow(non_snake_case)]
-#[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
-pub struct MetricMeta {
-    pub author: Option<String>,
-    pub uri: Option<String>,
-    pub tags: Option<String>,
-    pub created: Option<String>,
-    pub identifier: Option<String>,
-    pub deprecated: Option<String>,
-    pub summary: Option<String>,
-    pub isProduction: Option<u8>,
-    pub title: Option<String>,
-    pub category: Option<String>,
-    pub updated: Option<String>,
-    pub contributor: Option<String>,
-}
 
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
 pub struct MetricContent {
@@ -43,7 +24,7 @@ pub struct MetricContent {
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
 pub struct MetricBody {
     pub content: MetricContent,
-    pub meta: MetricMeta,
+    pub meta: super::MetadataMeta,
 }
 
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
@@ -52,15 +33,8 @@ pub struct Metric {
 }
 
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
-pub struct MetricPaging {
-    pub next: Option<String>,
-    pub count: Option<u32>,
-    pub offset: Option<u32>,
-}
-
-#[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
 pub struct ObjectsMetricBody {
-    pub paging: MetricPaging,
+    pub paging: super::MetadataPaging,
     pub items: Vec<Metric>,
 }
 
