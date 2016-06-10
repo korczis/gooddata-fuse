@@ -148,6 +148,21 @@ pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
             if inode.reserved == constants::ReservedFile::KeepMe as u8 {
                 let attr = create_inode_directory_attributes(ino);
                 reply.attr(&constants::DEFAULT_TTL, &attr);
+            } else if inode.reserved == 0 {
+                // JSON REPORT
+                let pid = (inode.project - 1) as usize;
+                let project: &object::Project = &fs.client().projects().as_ref().unwrap()[pid]
+                    .clone();
+
+                let report =
+                    &project.reports(&mut fs.client.connector).objects.items[inode.item as usize];
+
+                let json: String = report.clone().into();
+                let attr = create_inode_file_attributes(ino,
+                                                        json.len() as u64,
+                                                        constants::DEFAULT_CREATE_TIME);
+                reply.attr(&constants::DEFAULT_TTL, &attr);
+                println!("Getting attributes {:?}", inode);
             } else {
                 println!("N A S T A L   H A P R ! ! !");
                 reply.error(ENOENT);
@@ -368,11 +383,16 @@ pub fn lookup(fs: &mut GoodDataFS, _req: &Request, parent: u64, name: &Path, rep
                     .find_by_identifier(&identifier);
                 println!("{:?}", report);
 
+                if !report.is_some() {
+                    reply.error(ENOENT);
+                    return;
+                }
+
                 let inode = inode::Inode {
                     project: inode.project,
                     category: constants::Category::MetadataReports as u8,
                     item: index,
-                    reserved: 1,
+                    reserved: 0,
                 };
                 let json: String = report.unwrap().into();
                 let attr = create_inode_file_attributes(inode::Inode::serialize(&inode),
@@ -572,7 +592,7 @@ pub fn readdir(fs: &mut GoodDataFS,
                     let inode = inode::Inode {
                         project: inode.project,
                         category: constants::Category::MetadataReports as u8,
-                        item: offset as u32 + 1,
+                        item: offset as u32,
                         reserved: 1,
                     };
                     let fileinode: u64 = inode.into();
@@ -582,9 +602,9 @@ pub fn readdir(fs: &mut GoodDataFS,
 
                     offset += 1;
                 }
-            }
 
-            reply.ok();
+                reply.ok();
+            }
         }
         _ => {
             let projectid = inode.project;

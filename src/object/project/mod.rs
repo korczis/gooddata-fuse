@@ -71,7 +71,7 @@ impl Project {
                                                        client: &mut Connector,
                                                        md_type: String)
                                                        -> T {
-        let uri = format!("/gdc/md/{}/objects/query?category={}&limit=50",
+        let uri = format!("/gdc/md/{}/objects/query?category={}&limit=10",
                           self.pid(),
                           md_type);
         let mut res = client.get(uri);
