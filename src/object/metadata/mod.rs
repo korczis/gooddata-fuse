@@ -1,7 +1,9 @@
+mod attribute;
 mod fact;
 mod metric;
 mod report;
 
+pub use self::attribute::*;
 pub use self::fact::*;
 pub use self::metric::*;
 pub use self::report::*;
