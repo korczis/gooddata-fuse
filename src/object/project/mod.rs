@@ -71,12 +71,16 @@ impl Project {
                                                        client: &mut Connector,
                                                        md_type: String)
                                                        -> T {
-        let uri = format!("/gdc/md/{}/objects/query?category={}&limit=50",
+        let uri = format!("/gdc/md/{}/objects/query?category={}&limit=10",
                           self.pid(),
                           md_type);
         let mut res = client.get(uri);
         let raw = client.get_content(&mut res);
 
         json::decode::<T>(&raw).unwrap()
+    }
+
+    pub fn reports(&self, client: &mut Connector) -> ObjectsReport {
+        self.get_metadata::<ObjectsReport>(client, "report".to_string())
     }
 }

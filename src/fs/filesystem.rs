@@ -133,7 +133,8 @@ impl Filesystem for GoodDataFS {
             fs::constants::INODE_PROJECTS_JSON => {
                 // println!("off: {}, size {}", offset, size);
                 let json = format!("{}\n",
-                                   json::as_pretty_json(&self.client.projects_fetch_if_none()).to_string());
+                                   json::as_pretty_json(&self.client.projects_fetch_if_none())
+                                       .to_string());
                 // let json: String = fs.client.projects().clone().unwrap().into();
                 reply.data(helpers::read_bytes(&json, offset, size));
             }
@@ -212,7 +213,7 @@ impl Filesystem for GoodDataFS {
         }
     }
 
-    fn unlink (&mut self, _req: &Request, parent: u64, name: &Path, reply: ReplyEmpty) {
+    fn unlink(&mut self, _req: &Request, parent: u64, name: &Path, reply: ReplyEmpty) {
         let parent_inode = inode::Inode::deserialize(parent);
         println!("GoodDataFS::unlinl() - Removing file in parent {} - {:?}, path: {}",
                  parent,

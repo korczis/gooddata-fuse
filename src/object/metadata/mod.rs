@@ -23,6 +23,12 @@ pub struct MetadataMeta {
     pub contributor: Option<String>,
 }
 
+impl MetadataMeta {
+    pub fn identifier(&self) -> &Option<String> {
+        &self.identifier
+    }
+}
+
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
 pub struct MetadataPaging {
     pub next: Option<String>,

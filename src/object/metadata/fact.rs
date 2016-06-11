@@ -1,8 +1,7 @@
 #[allow(non_snake_case)]
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
 pub struct ExprItem {
-    pub data: Option<String>,
-    // pub type: Option<String>,
+    pub data: Option<String>, // pub type: Option<String>,
 }
 
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
