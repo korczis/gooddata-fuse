@@ -9,7 +9,7 @@ else
 	LINKER_TOOL = ldd
 endif
 
-all: build test strip upx stats size deps outdated dot
+all: build test strip upx stats size deps outdated doc dot
 
 install_deps:
 		cargo install cargo-count
@@ -40,6 +40,9 @@ deps-debug: build-debug
 
 deps-release: build-release
 		${LINKER_TOOL} ./target/release/gooddata-fs
+
+doc:
+		cargo doc
 
 dot:
 		cargo graph \
