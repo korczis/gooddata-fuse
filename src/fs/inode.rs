@@ -48,3 +48,9 @@ impl Inode {
         }
     }
 }
+
+impl Into<Inode> for u64 {
+    fn into(self) -> Inode {
+        Inode::deserialize(self)
+    }
+}
