@@ -84,6 +84,7 @@ pub enum Category {
     MetadataTables,
     MetadataUserFilters,
     MetadataVisualizations,
+    MetadataLast, // End of Metadata Categories Marker
     PublicArtifacts,
     Roles,
     Schedules,

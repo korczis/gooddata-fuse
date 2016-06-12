@@ -11,7 +11,11 @@ use gd;
 use object;
 use helpers;
 
+mod ldm;
+mod metadata;
+
 use super::item;
+use super::project;
 
 use super::super::inode;
 
@@ -502,134 +506,41 @@ pub fn read(fs: &mut GoodDataFS,
 }
 
 pub fn readdir(fs: &mut GoodDataFS,
-               _req: &Request,
+               req: &Request,
                ino: u64,
-               _fh: u64,
+               fh: u64,
                in_offset: u64,
                mut reply: ReplyDirectory) {
     let mut offset = in_offset;
 
     let inode = inode::Inode::deserialize(ino);
     match inode.category {
-        x if x == constants::Category::Ldm as u8 => {
-            reply.ok();
-        }
-        x if x == constants::Category::Metadata as u8 => {
-            if offset == 0 {
-                // Attributes
-                let inode = inode::Inode {
-                    project: inode.project,
-                    category: constants::Category::MetadataAttributes as u8,
-                    item: 0,
-                    reserved: constants::ReservedFile::KeepMe as u8,
-                };
-                let fileinode: u64 = inode.into();
-                reply.add(fileinode,
-                          offset,
-                          FileType::Directory,
-                          constants::PROJECT_METADATA_ATTRIBUTES_DIR);
-                offset += 1;
-
-                // Facts
-                let inode = inode::Inode {
-                    project: inode.project,
-                    category: constants::Category::MetadataFacts as u8,
-                    item: 0,
-                    reserved: constants::ReservedFile::KeepMe as u8,
-                };
-                let fileinode: u64 = inode.into();
-                reply.add(fileinode,
-                          offset,
-                          FileType::Directory,
-                          constants::PROJECT_METADATA_FACTS_DIR);
-                offset += 1;
-
-                // Metrics
-                let inode = inode::Inode {
-                    project: inode.project,
-                    category: constants::Category::MetadataMetrics as u8,
-                    item: 0,
-                    reserved: constants::ReservedFile::KeepMe as u8,
-                };
-                let fileinode: u64 = inode.into();
-                reply.add(fileinode,
-                          offset,
-                          FileType::Directory,
-                          constants::PROJECT_METADATA_METRICS_DIR);
-                offset += 1;
-
-                // Reports
-                let inode = inode::Inode {
-                    project: inode.project,
-                    category: constants::Category::MetadataReports as u8,
-                    item: 0,
-                    reserved: constants::ReservedFile::KeepMe as u8,
-                };
-                let fileinode: u64 = inode.into();
-                reply.add(fileinode,
-                          offset,
-                          FileType::Directory,
-                          constants::PROJECT_METADATA_REPORTS_DIR);
-                offset += 1;
-
-                // Report Definitions
-                let inode = inode::Inode {
-                    project: inode.project,
-                    category: constants::Category::MetadataReportDefinition as u8,
-                    item: 0,
-                    reserved: constants::ReservedFile::KeepMe as u8,
-                };
-                let fileinode: u64 = inode.into();
-                reply.add(fileinode,
-                          offset,
-                          FileType::Directory,
-                          constants::PROJECT_METADATA_REPORT_DEFINITIONS_DIR);
-
-                // offset += 1;
-
-                reply.ok();
-            }
-        }
-        x if x == constants::Category::MetadataReports as u8 => {
-            let project: &object::Project = &project_from_inode(fs, ino);
-            let report_items = project.reports(&mut fs.client.connector);
-
-            if offset == 0 {
-                for item in report_items.objects.items.into_iter() {
-                    let name = format!("{}.json", item.report.meta.identifier.unwrap());
-
-                    // Reports
-                    let inode = inode::Inode {
-                        project: inode.project,
-                        category: constants::Category::MetadataReports as u8,
-                        item: offset as u32,
-                        reserved: 1,
-                    };
-                    let fileinode: u64 = inode.into();
-                    reply.add(fileinode, offset, FileType::RegularFile, &name);
-
-                    println!("Adding inode {:?}, name {:?}", inode, &name);
-
-                    offset += 1;
-                }
-
-                reply.ok();
-            }
-        }
-        _ => {
+        x if x == constants::Category::Internal as u8 => {
             let projectid = inode.project - 1;
 
             // Iterate over all project::ITEMS
-            if offset == 0 {
-                if inode.category == constants::Category::Internal as u8 {
-                    for item in PROJECT_ITEMS.into_iter().skip(offset as usize) {
-                        item.readdir(projectid, &offset, &mut reply);
-                        offset += 1;
-                    }
+            if offset + 1 < PROJECT_ITEMS.len() as u64 {
+                for item in PROJECT_ITEMS.into_iter().skip(offset as usize) {
+                    println!("{:?}", item);
+                    item.readdir(projectid, &offset, &mut reply);
+                    offset += 1;
                 }
             }
 
             reply.ok();
+        }
+        x if x == constants::Category::Ldm as u8 => {
+            project::ldm::readdir(fs, req, ino, fh, in_offset, reply)
+        }
+        x if x == constants::Category::Metadata as u8 => {
+            project::metadata::readdir(fs, req, ino, fh, in_offset, reply)
+        }
+        x if x == constants::Category::MetadataReports as u8 => {
+            project::metadata::reports::readdir(fs, req, ino, fh, in_offset, reply)
+        }
+        _ => {
+            println!("fs::project::readdir() - Unknow Category {}",
+                     inode.category);
         }
     }
 }

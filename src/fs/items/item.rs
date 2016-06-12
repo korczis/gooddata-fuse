@@ -3,6 +3,7 @@ use fuse::{FileType, ReplyDirectory};
 use super::super::inode;
 
 // Project Folder Item
+#[derive(Debug)]
 pub struct ProjectItem {
     pub category: u8,
     pub reserved: u8,
