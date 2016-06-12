@@ -62,7 +62,7 @@ pub const METADATA_DIR: item::ProjectItem = item::ProjectItem {
 
 pub const PROJECT_DIRS: [item::ProjectItem; 2] = [LDM_DIR, METADATA_DIR];
 
-pub const PROJECT_ITEMS: [item::ProjectItem; 6] =
+pub static PROJECT_ITEMS: [item::ProjectItem; 6] =
     [FEATURE_FLAGS_JSON, PROJECT_JSON, PERMISSIONS_JSON, USER_ROLES_JSON, LDM_DIR, METADATA_DIR];
 
 /// Gets project from inode
@@ -617,29 +617,13 @@ pub fn readdir(fs: &mut GoodDataFS,
             }
         }
         _ => {
-            let projectid = inode.project;
+            let projectid = inode.project - 1;
 
             // Iterate over all project::ITEMS
             if offset == 0 {
                 if inode.category == constants::Category::Internal as u8 {
                     for item in PROJECT_ITEMS.into_iter().skip(offset as usize) {
-                        let inode = inode::Inode {
-                            project: projectid,
-                            category: item.category,
-                            item: 0,
-                            reserved: item.reserved,
-                        };
-
-                        let fileinode: u64 = inode.into();
-                        println!("GoodDataFS::readdir() - Adding inode {} - {:?}, project {}, \
-                                  path {}",
-                                 fileinode,
-                                 &inode,
-                                 projectid - 1,
-                                 item.path);
-
-                        reply.add(fileinode, offset, item.item_type, item.path);
-
+                        item.readdir(projectid, &offset, &mut reply);
                         offset += 1;
                     }
                 }

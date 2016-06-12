@@ -41,6 +41,7 @@ rpath = false
 lto = false
 debug-assertions = true
 codegen-units = 4
+# -Z time-passes
 
 [profile.release]
 opt-level = 3
