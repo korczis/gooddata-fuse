@@ -4,9 +4,6 @@
 *.rlib
 *.dll
 
-# Generated documentation
-doc/
-
 # Executables
 *.exe
 
