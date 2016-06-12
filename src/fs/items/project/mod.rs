@@ -1,3 +1,4 @@
+
 use fuse::{FileType, ReplyAttr, ReplyData, ReplyEntry, ReplyDirectory, Request};
 use libc::ENOENT;
 use rustc_serialize::json;
@@ -65,10 +66,7 @@ pub const PROJECT_ITEMS: [item::ProjectItem; 6] =
     [FEATURE_FLAGS_JSON, PROJECT_JSON, PERMISSIONS_JSON, USER_ROLES_JSON, LDM_DIR, METADATA_DIR];
 
 /// Gets project from inode
-///
-/// @params ino u64 or Inode
-/// @returns object::Project
-fn project_from_inode<Type: Into<inode::Inode>>(fs: &GoodDataFS, ino: Type) -> object::Project {
+pub fn project_from_inode<Type: Into<inode::Inode>>(fs: &GoodDataFS, ino: Type) -> object::Project {
     let inode = ino.into();
     let pid = (inode.project - 1) as usize;
 
