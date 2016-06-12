@@ -1,14 +1,33 @@
-use fuse::{FileType, ReplyDirectory};
+use fuse::{FileType, ReplyAttr, ReplyData, ReplyDirectory, Request};
+
+use fs::GoodDataFS;
 
 use super::super::inode;
 
+// struct GetattrOp {
+//     pub op: Box<Fn(&mut GoodDataFS, &Request, u64, ReplyAttr)>,
+// }
+//
+// impl GetattrOp<F: FnMut(uint) -> uin> {
+//     pub fn new(op: Box<Fn(&mut GoodDataFS, &Request, u64, ReplyAttr)>) {
+//         GetattrOp { op: op }
+//     }
+// }
+
 // Project Folder Item
-#[derive(Debug)]
 pub struct ProjectItem {
     pub category: u8,
     pub reserved: u8,
     pub item_type: FileType,
     pub path: &'static str,
+
+    // FUSE Functions
+    pub getattr: fn(&mut GoodDataFS, &Request, u64, ReplyAttr),
+    pub read: fn(&mut GoodDataFS,
+                 inode::Inode,
+                 ReplyData,
+                 offset: u64,
+                 size: u32),
 }
 
 impl ProjectItem {

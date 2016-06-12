@@ -48,6 +48,7 @@ pub const INODE_PROJECTS_JSON: u64 = 4;
 #[allow(dead_code)]
 pub enum Category {
     Internal,
+    Project,
     Connectors,
     Dataload,
     DataloadDownload,

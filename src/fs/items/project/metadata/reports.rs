@@ -7,6 +7,7 @@ use fs::items::project::project_from_inode;
 
 use object;
 
+#[allow(dead_code)]
 pub fn read(_fs: &mut GoodDataFS,
             _req: &Request,
             _ino: u64,
@@ -27,8 +28,8 @@ pub fn readdir(fs: &mut GoodDataFS,
     let report_items = project.reports(&mut fs.client.connector);
 
     let mut offset = in_offset;
-    if offset == 0 {
-        for item in report_items.objects.items.into_iter() {
+    if offset + 1 < report_items.objects.items.len() as u64 {
+        for item in report_items.objects.items.into_iter().skip(offset as usize) {
             let name = format!("{}.json", item.report.meta.identifier.unwrap());
 
             // Reports
@@ -45,7 +46,7 @@ pub fn readdir(fs: &mut GoodDataFS,
 
             offset += 1;
         }
-
-        reply.ok();
     }
+
+    reply.ok();
 }

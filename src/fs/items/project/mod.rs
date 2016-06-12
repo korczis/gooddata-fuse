@@ -1,5 +1,4 @@
-
-use fuse::{FileType, ReplyAttr, ReplyData, ReplyEntry, ReplyDirectory, Request};
+use fuse::{ReplyAttr, ReplyData, ReplyEntry, ReplyDirectory, Request};
 use libc::ENOENT;
 use rustc_serialize::json;
 use std::path::Path;
@@ -7,67 +6,31 @@ use std::path::Path;
 use fs::constants;
 use fs::GoodDataFS;
 use fs::helpers::{create_inode_directory_attributes, create_inode_file_attributes};
-use gd;
 use object;
-use helpers;
 
+mod feature_flags;
 mod ldm;
 mod metadata;
+mod project_json;
+mod user_permissions;
+mod user_roles;
 
 use super::item;
 use super::project;
 
 use super::super::inode;
 
-pub const FEATURE_FLAGS_JSON: item::ProjectItem = item::ProjectItem {
-    category: constants::Category::Internal as u8,
-    reserved: constants::ReservedFile::FeatureFlagsJson as u8,
-    item_type: FileType::RegularFile,
-    path: constants::FEATURE_FLAGS_JSON_FILENAME,
-};
-
-pub const PROJECT_JSON: item::ProjectItem = item::ProjectItem {
-    category: constants::Category::Internal as u8,
-    reserved: constants::ReservedFile::ProjectJson as u8,
-    item_type: FileType::RegularFile,
-    path: constants::PROJECT_JSON_FILENAME,
-};
-
-pub const PERMISSIONS_JSON: item::ProjectItem = item::ProjectItem {
-    category: constants::Category::Internal as u8,
-    reserved: constants::ReservedFile::PermissionsJson as u8,
-    item_type: FileType::RegularFile,
-    path: constants::USER_PERMISSIONS_JSON_FILENAME,
-};
-
-pub const USER_ROLES_JSON: item::ProjectItem = item::ProjectItem {
-    category: constants::Category::Ldm as u8,
-    reserved: constants::ReservedFile::RolesJson as u8,
-    item_type: FileType::RegularFile,
-    path: constants::USER_ROLES_JSON_FILENAME,
-};
-
 pub const PROJECT_FILES: [item::ProjectItem; 4] =
-    [FEATURE_FLAGS_JSON, PROJECT_JSON, PERMISSIONS_JSON, USER_ROLES_JSON];
+    [feature_flags::ITEM, project_json::ITEM, user_permissions::ITEM, user_roles::ITEM];
 
-pub const LDM_DIR: item::ProjectItem = item::ProjectItem {
-    category: constants::Category::Internal as u8,
-    reserved: constants::ReservedFile::KeepMe as u8,
-    item_type: FileType::Directory,
-    path: constants::PROJECT_LDM_DIR,
-};
+pub const PROJECT_DIRS: [item::ProjectItem; 2] = [ldm::ITEM, metadata::ITEM];
 
-pub const METADATA_DIR: item::ProjectItem = item::ProjectItem {
-    category: constants::Category::Metadata as u8,
-    reserved: constants::ReservedFile::KeepMe as u8,
-    item_type: FileType::Directory,
-    path: constants::PROJECT_METADATA_DIR,
-};
-
-pub const PROJECT_DIRS: [item::ProjectItem; 2] = [LDM_DIR, METADATA_DIR];
-
-pub static PROJECT_ITEMS: [item::ProjectItem; 6] =
-    [FEATURE_FLAGS_JSON, PROJECT_JSON, PERMISSIONS_JSON, USER_ROLES_JSON, LDM_DIR, METADATA_DIR];
+pub const PROJECT_ITEMS: [item::ProjectItem; 6] = [feature_flags::ITEM,
+                                                   project_json::ITEM,
+                                                   user_permissions::ITEM,
+                                                   user_roles::ITEM,
+                                                   ldm::ITEM,
+                                                   metadata::ITEM];
 
 /// Gets project from inode
 pub fn project_from_inode<Type: Into<inode::Inode>>(fs: &GoodDataFS, ino: Type) -> object::Project {
@@ -75,53 +38,6 @@ pub fn project_from_inode<Type: Into<inode::Inode>>(fs: &GoodDataFS, ino: Type) 
     let pid = (inode.project - 1) as usize;
 
     fs.client().projects().as_ref().unwrap()[pid].clone()
-}
-
-fn project_feature_flags_json(fs: &mut GoodDataFS, _req: &Request, ino: u64, reply: ReplyAttr) {
-    let project: &object::Project = &project_from_inode(fs, ino);
-
-    let feature_flags = project.feature_flags(&mut fs.client.connector);
-    if feature_flags.is_some() {
-        let json: String = feature_flags.unwrap().into();
-
-        let attr =
-            create_inode_file_attributes(ino, json.len() as u64, constants::DEFAULT_CREATE_TIME);
-        reply.attr(&constants::DEFAULT_TTL, &attr);
-    }
-}
-
-fn project_project_json(fs: &mut GoodDataFS, _req: &Request, ino: u64, reply: ReplyAttr) {
-    let project: &object::Project = &project_from_inode(fs, ino);
-    let json = json::as_pretty_json(project).to_string();
-
-    let attr = create_inode_file_attributes(ino, json.len() as u64, constants::DEFAULT_CREATE_TIME);
-    reply.attr(&constants::DEFAULT_TTL, &attr);
-}
-
-fn project_permissions_json(fs: &mut GoodDataFS, _req: &Request, ino: u64, reply: ReplyAttr) {
-    let project: &object::Project = &project_from_inode(fs, ino);
-
-    let user_permissions = project.user_permissions(&mut fs.client.connector);
-    if user_permissions.is_some() {
-        let json: String = user_permissions.unwrap().into();
-
-        let attr =
-            create_inode_file_attributes(ino, json.len() as u64, constants::DEFAULT_CREATE_TIME);
-        reply.attr(&constants::DEFAULT_TTL, &attr);
-    }
-}
-
-fn project_roles_json(fs: &mut GoodDataFS, _req: &Request, ino: u64, reply: ReplyAttr) {
-    let project: &object::Project = &project_from_inode(fs, ino);
-
-    let user_roles = project.user_roles(&mut fs.client.connector);
-
-    if user_roles.is_some() {
-        let json: String = user_roles.unwrap().into();
-        let attr =
-            create_inode_file_attributes(ino, json.len() as u64, constants::DEFAULT_CREATE_TIME);
-        reply.attr(&constants::DEFAULT_TTL, &attr);
-    }
 }
 
 pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
@@ -133,13 +49,17 @@ pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
             let reserved = constants::ReservedFile::from(inode.reserved);
             match reserved {
                 constants::ReservedFile::FeatureFlagsJson => {
-                    project_feature_flags_json(fs, req, ino, reply)
+                    (feature_flags::ITEM.getattr)(fs, req, ino, reply)
                 }
-                constants::ReservedFile::ProjectJson => project_project_json(fs, req, ino, reply),
+                constants::ReservedFile::ProjectJson => {
+                    (project_json::ITEM.getattr)(fs, req, ino, reply)
+                }
                 constants::ReservedFile::PermissionsJson => {
-                    project_permissions_json(fs, req, ino, reply)
+                    (user_permissions::ITEM.getattr)(fs, req, ino, reply)
                 }
-                constants::ReservedFile::RolesJson => project_roles_json(fs, req, ino, reply),
+                constants::ReservedFile::RolesJson => {
+                    (user_roles::ITEM.getattr)(fs, req, ino, reply)
+                }
                 _ => reply.error(ENOENT),
             }
         } else if inode.category == constants::Category::Ldm as u8 {
@@ -214,10 +134,8 @@ fn project_json(fs: &mut GoodDataFS, inode_parent: &inode::Inode, reply: ReplyEn
         reserved: constants::ReservedFile::ProjectJson as u8,
     });
 
-    let client: &gd::GoodDataClient = fs.client();
-    let projects = client.projects().as_ref();
-    let json = json::as_pretty_json(&projects.unwrap()[(inode_parent.project - 1) as usize])
-        .to_string();
+    let project: &object::Project = &project_from_inode(fs, inode);
+    let json = json::as_pretty_json(project).to_string();
     let attr =
         create_inode_file_attributes(inode, json.len() as u64, constants::DEFAULT_CREATE_TIME);
     reply.entry(&constants::DEFAULT_TTL, &attr, 0);
@@ -409,75 +327,6 @@ pub fn lookup(fs: &mut GoodDataFS, _req: &Request, parent: u64, name: &Path, rep
     }
 }
 
-fn read_feature_flags_json(fs: &mut GoodDataFS,
-                           inode: inode::Inode,
-                           reply: ReplyData,
-                           offset: u64,
-                           size: u32) {
-    println!("GoodDataFS::read() - Reading {}",
-             constants::FEATURE_FLAGS_JSON_FILENAME);
-
-    let project: &object::Project = &project_from_inode(fs, inode);
-
-    let feature_flags = project.feature_flags(&mut fs.client.connector);
-    if feature_flags.is_some() {
-        let json: String = feature_flags.unwrap().into();
-        // reply.data(&json.as_bytes()[offset as usize..]);
-        reply.data(helpers::read_bytes(&json, offset, size));
-    }
-}
-
-fn read_project_json(fs: &mut GoodDataFS,
-                     inode: inode::Inode,
-                     reply: ReplyData,
-                     offset: u64,
-                     size: u32) {
-    println!("GoodDataFS::read() - Reading {}",
-             constants::PROJECT_JSON_FILENAME);
-
-    let client: &gd::GoodDataClient = fs.client();
-    let projects = client.projects().as_ref();
-    let json = json::as_pretty_json(&projects.unwrap()[(inode.project - 1) as usize]).to_string();
-    // reply.data(&json.as_bytes()[offset as usize..]);
-    reply.data(helpers::read_bytes(&json, offset, size));
-}
-
-fn read_permissions_json(fs: &mut GoodDataFS,
-                         inode: inode::Inode,
-                         reply: ReplyData,
-                         offset: u64,
-                         size: u32) {
-    println!("GoodDataFS::read() - Reading {}",
-             constants::USER_PERMISSIONS_JSON_FILENAME);
-
-    let project: &object::Project = &project_from_inode(fs, inode);
-
-    let user_permissions = project.user_permissions(&mut fs.client.connector);
-    if user_permissions.is_some() {
-        let json: String = user_permissions.unwrap().into();
-        // reply.data(&json.as_bytes()[offset as usize..]);
-        reply.data(helpers::read_bytes(&json, offset, size));
-    }
-}
-
-fn read_roles_json(fs: &mut GoodDataFS,
-                   inode: inode::Inode,
-                   reply: ReplyData,
-                   offset: u64,
-                   size: u32) {
-    println!("GoodDataFS::read() - Reading {}",
-             constants::USER_ROLES_JSON_FILENAME);
-
-    let project: &object::Project = &project_from_inode(fs, inode);
-
-    let user_roles = project.user_roles(&mut fs.client.connector);
-    if user_roles.is_some() {
-        let json: String = user_roles.unwrap().into();
-        // reply.data(&json.as_bytes()[offset as usize..]);
-        reply.data(helpers::read_bytes(&json, offset, size));
-    }
-}
-
 pub fn read(fs: &mut GoodDataFS,
             _req: &Request,
             ino: u64,
@@ -489,14 +338,16 @@ pub fn read(fs: &mut GoodDataFS,
     let reserved = constants::ReservedFile::from(inode.reserved);
     match reserved {
         constants::ReservedFile::FeatureFlagsJson => {
-            read_feature_flags_json(fs, inode, reply, offset, size)
+            (feature_flags::ITEM.read)(fs, inode, reply, offset, size)
         }
-        constants::ReservedFile::ProjectJson => read_project_json(fs, inode, reply, offset, size),
+        constants::ReservedFile::ProjectJson => {
+            (project_json::ITEM.read)(fs, inode, reply, offset, size)
+        }
         constants::ReservedFile::PermissionsJson => {
-            read_permissions_json(fs, inode, reply, offset, size)
+            (user_permissions::ITEM.read)(fs, inode, reply, offset, size)
         }
         constants::ReservedFile::RolesJson => {
-            read_roles_json(fs, inode, reply, offset, size);
+            (user_roles::ITEM.read)(fs, inode, reply, offset, size);
         }
         _ => {
             reply.error(ENOENT);
@@ -521,7 +372,6 @@ pub fn readdir(fs: &mut GoodDataFS,
             // Iterate over all project::ITEMS
             if offset + 1 < PROJECT_ITEMS.len() as u64 {
                 for item in PROJECT_ITEMS.into_iter().skip(offset as usize) {
-                    println!("{:?}", item);
                     item.readdir(projectid, &offset, &mut reply);
                     offset += 1;
                 }

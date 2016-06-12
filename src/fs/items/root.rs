@@ -1,25 +1,45 @@
-use fuse::{FileType, ReplyAttr, ReplyEntry, ReplyDirectory, Request};
+use fuse::{FileType, ReplyAttr, ReplyData, ReplyEntry, ReplyDirectory, Request};
 use libc::ENOENT;
 
 use fs::constants;
 use fs::GoodDataFS;
-
-use super::item;
+use fs::inode;
+use fs::item;
 
 use std::path::Path;
 
+fn projects_dir_getattr(_fs: &mut GoodDataFS, _req: &Request, _ino: u64, _reply: ReplyAttr) {}
+fn projects_dir_read(_fs: &mut GoodDataFS,
+                     _inode: inode::Inode,
+                     _reply: ReplyData,
+                     _offset: u64,
+                     _size: u32) {
+}
 pub const PROJECTS_DIR: item::ProjectItem = item::ProjectItem {
     category: constants::Category::Internal as u8,
     reserved: 0,
     item_type: FileType::Directory,
     path: constants::PROJECTS_DIRNAME,
+
+    getattr: projects_dir_getattr,
+    read: projects_dir_read,
 };
 
+fn user_json_getattr(_fs: &mut GoodDataFS, _req: &Request, _ino: u64, _reply: ReplyAttr) {}
+fn user_json_read(_fs: &mut GoodDataFS,
+                  _inode: inode::Inode,
+                  _reply: ReplyData,
+                  _offset: u64,
+                  _size: u32) {
+}
 pub const USER_JSON: item::ProjectItem = item::ProjectItem {
     category: constants::Category::Internal as u8,
     reserved: 0,
     item_type: FileType::RegularFile,
     path: constants::USER_JSON_FILENAME,
+
+    getattr: user_json_getattr,
+    read: user_json_read,
 };
 
 pub const ROOT_ITEMS: [item::ProjectItem; 2] = [PROJECTS_DIR, USER_JSON];

@@ -1,11 +1,13 @@
-use fuse::{FileType, ReplyDirectory, Request};
+use fuse::{FileType, ReplyAttr, ReplyData, ReplyDirectory, Request};
 
 use fs::GoodDataFS;
-
-use super::super::super::inode;
-use super::super::super::constants;
+use fs::inode;
+use fs::item;
+use fs::constants;
 
 pub mod reports;
+
+fn read(_fs: &mut GoodDataFS, _inode: inode::Inode, _reply: ReplyData, _offset: u64, _size: u32) {}
 
 pub fn readdir(_fs: &mut GoodDataFS,
                _req: &Request,
@@ -90,3 +92,14 @@ pub fn readdir(_fs: &mut GoodDataFS,
         reply.ok();
     }
 }
+
+fn getattr(_fs: &mut GoodDataFS, _req: &Request, _ino: u64, _reply: ReplyAttr) {}
+pub const ITEM: item::ProjectItem = item::ProjectItem {
+    category: constants::Category::Metadata as u8,
+    reserved: constants::ReservedFile::KeepMe as u8,
+    item_type: FileType::Directory,
+    path: constants::PROJECT_METADATA_DIR,
+
+    getattr: getattr,
+    read: read,
+};
