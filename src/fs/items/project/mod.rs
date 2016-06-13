@@ -63,11 +63,9 @@ pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
                 _ => reply.error(ENOENT),
             }
         } else if inode.category == constants::Category::Ldm as u8 {
-            let attr = create_inode_directory_attributes(ino);
-            reply.attr(&constants::DEFAULT_TTL, &attr);
+            (ldm::ITEM.getattr)(fs, req, ino, reply)
         } else if inode.category == constants::Category::Metadata as u8 {
-            let attr = create_inode_directory_attributes(ino);
-            reply.attr(&constants::DEFAULT_TTL, &attr);
+            (metadata::ITEM.getattr)(fs, req, ino, reply)
         } else if inode.category == constants::Category::MetadataAttributes as u8 {
             let attr = create_inode_directory_attributes(ino);
             reply.attr(&constants::DEFAULT_TTL, &attr);
@@ -109,62 +107,6 @@ pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
         reply.error(ENOENT);
     }
 }
-
-fn feature_flags_json(fs: &mut GoodDataFS, inode_parent: &inode::Inode, reply: ReplyEntry) {
-    let inode = inode::Inode::create(inode_parent.project,
-                                     constants::Category::Internal as u8,
-                                     0,
-                                     constants::ReservedFile::FeatureFlagsJson as u8);
-    let project: &object::Project = &project_from_inode(fs, *inode_parent);
-
-    let feature_flags = project.feature_flags(&mut fs.client.connector);
-    if feature_flags.is_some() {
-        let json: String = feature_flags.unwrap().into();
-        let attr =
-            create_inode_file_attributes(inode, json.len() as u64, constants::DEFAULT_CREATE_TIME);
-        reply.entry(&constants::DEFAULT_TTL, &attr, 0);
-    }
-}
-
-fn project_json(fs: &mut GoodDataFS, inode_parent: &inode::Inode, reply: ReplyEntry) {
-    let inode = inode::Inode::serialize(&inode::Inode {
-        project: inode_parent.project,
-        category: constants::Category::Internal as u8,
-        item: 0,
-        reserved: constants::ReservedFile::ProjectJson as u8,
-    });
-
-    let project: &object::Project = &project_from_inode(fs, inode);
-    let json = json::as_pretty_json(project).to_string();
-    let attr =
-        create_inode_file_attributes(inode, json.len() as u64, constants::DEFAULT_CREATE_TIME);
-    reply.entry(&constants::DEFAULT_TTL, &attr, 0);
-}
-
-fn project_ldm_dir(inode_parent: &inode::Inode, reply: ReplyEntry) {
-    let inode = inode::Inode::serialize(&inode::Inode {
-        project: inode_parent.project,
-        category: constants::Category::Ldm as u8,
-        item: 0,
-        reserved: constants::ReservedFile::KeepMe as u8,
-    });
-
-    let attr = create_inode_directory_attributes(inode);
-    reply.entry(&constants::DEFAULT_TTL, &attr, 0);
-}
-
-fn project_metadata_dir(inode_parent: &inode::Inode, reply: ReplyEntry) {
-    let inode = inode::Inode::serialize(&inode::Inode {
-        project: inode_parent.project,
-        category: constants::Category::Metadata as u8,
-        item: 0,
-        reserved: constants::ReservedFile::KeepMe as u8,
-    });
-
-    let attr = create_inode_directory_attributes(inode);
-    reply.entry(&constants::DEFAULT_TTL, &attr, 0);
-}
-
 
 fn project_metadata_attributes_dir(inode_parent: &inode::Inode, reply: ReplyEntry) {
     let inode = inode::Inode::serialize(&inode::Inode {
@@ -226,52 +168,20 @@ fn project_metadata_report_definitions_dir(inode_parent: &inode::Inode, reply: R
     reply.entry(&constants::DEFAULT_TTL, &attr, 0);
 }
 
-fn permissions_json(fs: &mut GoodDataFS, inode_parent: &inode::Inode, reply: ReplyEntry) {
-    let inode = inode::Inode::serialize(&inode::Inode {
-        project: inode_parent.project,
-        category: constants::Category::Internal as u8,
-        item: 0,
-        reserved: constants::ReservedFile::PermissionsJson as u8,
-    });
-
-    let project: &object::Project = &project_from_inode(fs, *inode_parent);
-    let user_permissions = project.user_permissions(&mut fs.client.connector);
-
-    if user_permissions.is_some() {
-        let json: String = user_permissions.unwrap().into();
-        let attr =
-            create_inode_file_attributes(inode, json.len() as u64, constants::DEFAULT_CREATE_TIME);
-        reply.entry(&constants::DEFAULT_TTL, &attr, 0);
-    }
-}
-
-fn roles_json(fs: &mut GoodDataFS, inode_parent: &inode::Inode, reply: ReplyEntry) {
-    let inode = inode::Inode::serialize(&inode::Inode {
-        project: inode_parent.project,
-        category: constants::Category::Internal as u8,
-        item: 0,
-        reserved: constants::ReservedFile::RolesJson as u8,
-    });
-
-    let project: &object::Project = &project_from_inode(fs, *inode_parent);
-    let user_roles = project.user_roles(&mut fs.client.connector);
-
-    if user_roles.is_some() {
-        let json: String = user_roles.unwrap().into();
-        let attr =
-            create_inode_file_attributes(inode, json.len() as u64, constants::DEFAULT_CREATE_TIME);
-        reply.entry(&constants::DEFAULT_TTL, &attr, 0);
-    }
-}
-
-pub fn lookup(fs: &mut GoodDataFS, _req: &Request, parent: u64, name: &Path, reply: ReplyEntry) {
+pub fn lookup(fs: &mut GoodDataFS, req: &Request, parent: u64, name: &Path, reply: ReplyEntry) {
     let inode = inode::Inode::deserialize(parent);
 
     match name.to_str() {
-        Some(constants::FEATURE_FLAGS_JSON_FILENAME) => feature_flags_json(fs, &inode, reply),
-        Some(constants::PROJECT_JSON_FILENAME) => project_json(fs, &inode, reply),
-        Some(constants::PROJECT_LDM_DIR) => project_ldm_dir(&inode, reply),
-        Some(constants::PROJECT_METADATA_DIR) => project_metadata_dir(&inode, reply),
+        Some(constants::FEATURE_FLAGS_JSON_FILENAME) => {
+            (feature_flags::ITEM.lookup)(fs, req, parent, name, reply)
+        }
+        Some(constants::PROJECT_JSON_FILENAME) => {
+            (project_json::ITEM.lookup)(fs, req, parent, name, reply)
+        }
+        Some(constants::PROJECT_LDM_DIR) => (ldm::ITEM.lookup)(fs, req, parent, name, reply),
+        Some(constants::PROJECT_METADATA_DIR) => {
+            (metadata::ITEM.lookup)(fs, req, parent, name, reply)
+        }
         Some(constants::PROJECT_METADATA_ATTRIBUTES_DIR) => {
             project_metadata_attributes_dir(&inode, reply)
         }
@@ -285,8 +195,12 @@ pub fn lookup(fs: &mut GoodDataFS, _req: &Request, parent: u64, name: &Path, rep
         Some(constants::PROJECT_METADATA_REPORT_DEFINITIONS_DIR) => {
             project_metadata_report_definitions_dir(&inode, reply)
         }
-        Some(constants::USER_PERMISSIONS_JSON_FILENAME) => permissions_json(fs, &inode, reply),
-        Some(constants::USER_ROLES_JSON_FILENAME) => roles_json(fs, &inode, reply),
+        Some(constants::USER_PERMISSIONS_JSON_FILENAME) => {
+            (user_permissions::ITEM.lookup)(fs, req, parent, name, reply)
+        }
+        Some(constants::USER_ROLES_JSON_FILENAME) => {
+            (user_roles::ITEM.lookup)(fs, req, parent, name, reply)
+        }
         _ => {
             if inode.category == constants::Category::MetadataReports as u8 &&
                inode.reserved == constants::ReservedFile::KeepMe as u8 {

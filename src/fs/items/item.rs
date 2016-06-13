@@ -1,8 +1,9 @@
-use fuse::{FileType, ReplyAttr, ReplyData, ReplyDirectory, Request};
+use fuse::{FileType, ReplyAttr, ReplyData, ReplyDirectory, ReplyEntry, Request};
+
+use std::path::Path;
 
 use fs::GoodDataFS;
-
-use super::super::inode;
+use fs::inode;
 
 // struct GetattrOp {
 //     pub op: Box<Fn(&mut GoodDataFS, &Request, u64, ReplyAttr)>,
@@ -23,6 +24,7 @@ pub struct ProjectItem {
 
     // FUSE Functions
     pub getattr: fn(&mut GoodDataFS, &Request, u64, ReplyAttr),
+    pub lookup: fn(&mut GoodDataFS, &Request, u64, &Path, ReplyEntry),
     pub read: fn(&mut GoodDataFS,
                  inode::Inode,
                  ReplyData,
