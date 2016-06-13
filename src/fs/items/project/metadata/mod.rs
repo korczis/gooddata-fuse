@@ -6,6 +6,10 @@ use fs::inode;
 use fs::item;
 use fs::constants;
 
+pub mod attributes;
+pub mod facts;
+pub mod metrics;
+pub mod report_definitions;
 pub mod reports;
 
 use std::path::Path;
@@ -16,7 +20,7 @@ fn getattr(_fs: &mut GoodDataFS, _req: &Request, ino: u64, reply: ReplyAttr) {
     reply.attr(&constants::DEFAULT_TTL, &attr);
 }
 
-fn lookup(fs: &mut GoodDataFS, _req: &Request, parent: u64, _name: &Path, reply: ReplyEntry) {
+fn lookup(_fs: &mut GoodDataFS, _req: &Request, parent: u64, _name: &Path, reply: ReplyEntry) {
     let inode_parent = inode::Inode::deserialize(parent);
     let inode = inode::Inode::serialize(&inode::Inode {
         project: inode_parent.project,

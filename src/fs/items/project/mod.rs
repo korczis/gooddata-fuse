@@ -1,11 +1,9 @@
 use fuse::{ReplyAttr, ReplyData, ReplyEntry, ReplyDirectory, Request};
 use libc::ENOENT;
-use rustc_serialize::json;
-use std::path::Path;
 
 use fs::constants;
 use fs::GoodDataFS;
-use fs::helpers::{create_inode_directory_attributes, create_inode_file_attributes};
+use fs::helpers::create_inode_file_attributes;
 use object;
 
 mod feature_flags;
@@ -19,6 +17,8 @@ use super::item;
 use super::project;
 
 use super::super::inode;
+
+use std::path::Path;
 
 pub const PROJECT_FILES: [item::ProjectItem; 4] =
     [feature_flags::ITEM, project_json::ITEM, user_permissions::ITEM, user_roles::ITEM];
@@ -69,21 +69,17 @@ pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
                 (metadata::ITEM.getattr)(fs, req, ino, reply)
             }
             x if x == constants::Category::MetadataAttributes as u8 => {
-                let attr = create_inode_directory_attributes(ino);
-                reply.attr(&constants::DEFAULT_TTL, &attr);
+                (metadata::attributes::ITEM.getattr)(fs, req, ino, reply)
             }
             x if x == constants::Category::MetadataFacts as u8 => {
-                let attr = create_inode_directory_attributes(ino);
-                reply.attr(&constants::DEFAULT_TTL, &attr);
+                (metadata::facts::ITEM.getattr)(fs, req, ino, reply)
             }
             x if x == constants::Category::MetadataMetrics as u8 => {
-                let attr = create_inode_directory_attributes(ino);
-                reply.attr(&constants::DEFAULT_TTL, &attr);
+                (metadata::metrics::ITEM.getattr)(fs, req, ino, reply)
             }
             x if x == constants::Category::MetadataReports as u8 => {
                 if inode.reserved == constants::ReservedFile::KeepMe as u8 {
-                    let attr = create_inode_directory_attributes(ino);
-                    reply.attr(&constants::DEFAULT_TTL, &attr);
+                    (metadata::reports::ITEM.getattr)(fs, req, ino, reply)
                 } else if inode.reserved == 0 {
                     // JSON REPORT
                     let project: &object::Project = &project_from_inode(fs, ino);
@@ -104,8 +100,7 @@ pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
                 }
             }
             x if x == constants::Category::MetadataReportDefinition as u8 => {
-                let attr = create_inode_directory_attributes(ino);
-                reply.attr(&constants::DEFAULT_TTL, &attr);
+                (metadata::report_definitions::ITEM.getattr)(fs, req, ino, reply)
             }
             _ => {
                 println!("fs::project::getattr() - not found!");
@@ -115,66 +110,6 @@ pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
         println!("GoodDataFS::getattr() - Not found inode {:?}", ino);
         reply.error(ENOENT);
     }
-}
-
-fn project_metadata_attributes_dir(inode_parent: &inode::Inode, reply: ReplyEntry) {
-    let inode = inode::Inode::serialize(&inode::Inode {
-        project: inode_parent.project,
-        category: constants::Category::MetadataAttributes as u8,
-        item: 0,
-        reserved: constants::ReservedFile::KeepMe as u8,
-    });
-
-    let attr = create_inode_directory_attributes(inode);
-    reply.entry(&constants::DEFAULT_TTL, &attr, 0);
-}
-
-fn project_metadata_facts_dir(inode_parent: &inode::Inode, reply: ReplyEntry) {
-    let inode = inode::Inode::serialize(&inode::Inode {
-        project: inode_parent.project,
-        category: constants::Category::MetadataFacts as u8,
-        item: 0,
-        reserved: constants::ReservedFile::KeepMe as u8,
-    });
-
-    let attr = create_inode_directory_attributes(inode);
-    reply.entry(&constants::DEFAULT_TTL, &attr, 0);
-}
-
-fn project_metadata_metrics_dir(inode_parent: &inode::Inode, reply: ReplyEntry) {
-    let inode = inode::Inode::serialize(&inode::Inode {
-        project: inode_parent.project,
-        category: constants::Category::MetadataMetrics as u8,
-        item: 0,
-        reserved: constants::ReservedFile::KeepMe as u8,
-    });
-
-    let attr = create_inode_directory_attributes(inode);
-    reply.entry(&constants::DEFAULT_TTL, &attr, 0);
-}
-
-fn project_metadata_reports_dir(inode_parent: &inode::Inode, reply: ReplyEntry) {
-    let inode = inode::Inode::serialize(&inode::Inode {
-        project: inode_parent.project,
-        category: constants::Category::MetadataReports as u8,
-        item: 0,
-        reserved: constants::ReservedFile::KeepMe as u8,
-    });
-
-    let attr = create_inode_directory_attributes(inode);
-    reply.entry(&constants::DEFAULT_TTL, &attr, 0);
-}
-
-fn project_metadata_report_definitions_dir(inode_parent: &inode::Inode, reply: ReplyEntry) {
-    let inode = inode::Inode::serialize(&inode::Inode {
-        project: inode_parent.project,
-        category: constants::Category::MetadataReportDefinition as u8,
-        item: 0,
-        reserved: constants::ReservedFile::KeepMe as u8,
-    });
-
-    let attr = create_inode_directory_attributes(inode);
-    reply.entry(&constants::DEFAULT_TTL, &attr, 0);
 }
 
 pub fn lookup(fs: &mut GoodDataFS, req: &Request, parent: u64, name: &Path, reply: ReplyEntry) {
@@ -192,17 +127,19 @@ pub fn lookup(fs: &mut GoodDataFS, req: &Request, parent: u64, name: &Path, repl
             (metadata::ITEM.lookup)(fs, req, parent, name, reply)
         }
         Some(constants::PROJECT_METADATA_ATTRIBUTES_DIR) => {
-            project_metadata_attributes_dir(&inode, reply)
+            (metadata::attributes::ITEM.lookup)(fs, req, parent, name, reply)
         }
-        Some(constants::PROJECT_METADATA_FACTS_DIR) => project_metadata_facts_dir(&inode, reply),
+        Some(constants::PROJECT_METADATA_FACTS_DIR) => {
+            (metadata::facts::ITEM.lookup)(fs, req, parent, name, reply)
+        }
         Some(constants::PROJECT_METADATA_METRICS_DIR) => {
-            project_metadata_metrics_dir(&inode, reply)
+            (metadata::metrics::ITEM.lookup)(fs, req, parent, name, reply)
         }
         Some(constants::PROJECT_METADATA_REPORTS_DIR) => {
-            project_metadata_reports_dir(&inode, reply)
+            (metadata::reports::ITEM.lookup)(fs, req, parent, name, reply)
         }
         Some(constants::PROJECT_METADATA_REPORT_DEFINITIONS_DIR) => {
-            project_metadata_report_definitions_dir(&inode, reply)
+            (metadata::report_definitions::ITEM.lookup)(fs, req, parent, name, reply)
         }
         Some(constants::USER_PERMISSIONS_JSON_FILENAME) => {
             (user_permissions::ITEM.lookup)(fs, req, parent, name, reply)
