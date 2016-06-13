@@ -10,6 +10,8 @@ RUN apt-get update && \
        gcc \
        libc6-dev \
        libfuse-dev \
+       libssl-dev \
+       pkg-config \
        -qqy \
        --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
@@ -27,5 +29,7 @@ RUN curl -fsOSL $RUST_DOWNLOAD_URL \
     && ./install.sh
 
 COPY . .
+
+RUN ldconfig -vv
 
 RUN cargo build
