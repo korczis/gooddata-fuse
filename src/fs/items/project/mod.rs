@@ -45,62 +45,71 @@ pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
     println!("fs::project::getattr() {} - {:?}", ino, inode);
 
     if inode.project > 0 {
-        if inode.category == constants::Category::Internal as u8 {
-            let reserved = constants::ReservedFile::from(inode.reserved);
-            match reserved {
-                constants::ReservedFile::FeatureFlagsJson => {
-                    (feature_flags::ITEM.getattr)(fs, req, ino, reply)
+        match inode.category {
+            x if x == constants::Category::Internal as u8 => {
+                let reserved = constants::ReservedFile::from(inode.reserved);
+                match reserved {
+                    constants::ReservedFile::FeatureFlagsJson => {
+                        (feature_flags::ITEM.getattr)(fs, req, ino, reply)
+                    }
+                    constants::ReservedFile::ProjectJson => {
+                        (project_json::ITEM.getattr)(fs, req, ino, reply)
+                    }
+                    constants::ReservedFile::PermissionsJson => {
+                        (user_permissions::ITEM.getattr)(fs, req, ino, reply)
+                    }
+                    constants::ReservedFile::RolesJson => {
+                        (user_roles::ITEM.getattr)(fs, req, ino, reply)
+                    }
+                    _ => reply.error(ENOENT),
                 }
-                constants::ReservedFile::ProjectJson => {
-                    (project_json::ITEM.getattr)(fs, req, ino, reply)
-                }
-                constants::ReservedFile::PermissionsJson => {
-                    (user_permissions::ITEM.getattr)(fs, req, ino, reply)
-                }
-                constants::ReservedFile::RolesJson => {
-                    (user_roles::ITEM.getattr)(fs, req, ino, reply)
-                }
-                _ => reply.error(ENOENT),
             }
-        } else if inode.category == constants::Category::Ldm as u8 {
-            (ldm::ITEM.getattr)(fs, req, ino, reply)
-        } else if inode.category == constants::Category::Metadata as u8 {
-            (metadata::ITEM.getattr)(fs, req, ino, reply)
-        } else if inode.category == constants::Category::MetadataAttributes as u8 {
-            let attr = create_inode_directory_attributes(ino);
-            reply.attr(&constants::DEFAULT_TTL, &attr);
-        } else if inode.category == constants::Category::MetadataFacts as u8 {
-            let attr = create_inode_directory_attributes(ino);
-            reply.attr(&constants::DEFAULT_TTL, &attr);
-        } else if inode.category == constants::Category::MetadataMetrics as u8 {
-            let attr = create_inode_directory_attributes(ino);
-            reply.attr(&constants::DEFAULT_TTL, &attr);
-        } else if inode.category == constants::Category::MetadataReports as u8 {
-            if inode.reserved == constants::ReservedFile::KeepMe as u8 {
+            x if x == constants::Category::Ldm as u8 => (ldm::ITEM.getattr)(fs, req, ino, reply),
+            x if x == constants::Category::Metadata as u8 => {
+                (metadata::ITEM.getattr)(fs, req, ino, reply)
+            }
+            x if x == constants::Category::MetadataAttributes as u8 => {
                 let attr = create_inode_directory_attributes(ino);
                 reply.attr(&constants::DEFAULT_TTL, &attr);
-            } else if inode.reserved == 0 {
-                // JSON REPORT
-                let project: &object::Project = &project_from_inode(fs, ino);
-
-                let report =
-                    &project.reports(&mut fs.client.connector).objects.items[inode.item as usize];
-
-                let json: String = report.clone().into();
-                let attr = create_inode_file_attributes(ino,
-                                                        json.len() as u64,
-                                                        constants::DEFAULT_CREATE_TIME);
-                reply.attr(&constants::DEFAULT_TTL, &attr);
-                println!("Getting attributes {:?}", inode);
-            } else {
-                println!("N A S T A L   H A P R ! ! !");
-                reply.error(ENOENT);
             }
-        } else if inode.category == constants::Category::MetadataReportDefinition as u8 {
-            let attr = create_inode_directory_attributes(ino);
-            reply.attr(&constants::DEFAULT_TTL, &attr);
-        } else {
-            println!("fs::project::getattr() - not found!");
+            x if x == constants::Category::MetadataFacts as u8 => {
+                let attr = create_inode_directory_attributes(ino);
+                reply.attr(&constants::DEFAULT_TTL, &attr);
+            }
+            x if x == constants::Category::MetadataMetrics as u8 => {
+                let attr = create_inode_directory_attributes(ino);
+                reply.attr(&constants::DEFAULT_TTL, &attr);
+            }
+            x if x == constants::Category::MetadataReports as u8 => {
+                if inode.reserved == constants::ReservedFile::KeepMe as u8 {
+                    let attr = create_inode_directory_attributes(ino);
+                    reply.attr(&constants::DEFAULT_TTL, &attr);
+                } else if inode.reserved == 0 {
+                    // JSON REPORT
+                    let project: &object::Project = &project_from_inode(fs, ino);
+
+                    let report = &project.reports(&mut fs.client.connector)
+                        .objects
+                        .items[inode.item as usize];
+
+                    let json: String = report.clone().into();
+                    let attr = create_inode_file_attributes(ino,
+                                                            json.len() as u64,
+                                                            constants::DEFAULT_CREATE_TIME);
+                    reply.attr(&constants::DEFAULT_TTL, &attr);
+                    println!("Getting attributes {:?}", inode);
+                } else {
+                    println!("N A S T A L   H A P R ! ! !");
+                    reply.error(ENOENT);
+                }
+            }
+            x if x == constants::Category::MetadataReportDefinition as u8 => {
+                let attr = create_inode_directory_attributes(ino);
+                reply.attr(&constants::DEFAULT_TTL, &attr);
+            }
+            _ => {
+                println!("fs::project::getattr() - not found!");
+            }
         }
     } else {
         println!("GoodDataFS::getattr() - Not found inode {:?}", ino);
