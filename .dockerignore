@@ -1,5 +1,15 @@
+# Dockerfile stuff itself
+Dockerfile
+.dockerignoe
+
 # Git stuff
 .git/
 
 # Build files
 target/
+
+# Scripts
+scripts/
+
+# Mount point
+gd-fs

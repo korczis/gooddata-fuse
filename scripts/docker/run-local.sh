@@ -1,3 +1,3 @@
 #! /usr/bin/env sh
 
-docker run --name gooddata-rust -d gooddata-rust
+docker run -i -t --privileged=true --name gooddata-fs -v /gd-fs gd-fs gooddata-fs

@@ -42,3 +42,7 @@ RUN make install_deps
 
 # Build all gooddata-fs stuff
 RUN make all
+
+RUN mkdir -p /gd-fs
+
+CMD ["sudo", "./bin/gooddata-fs", "tomas.korcak+gem_tester@gooddata.com", "jindrisska", "/gd-fs"]
