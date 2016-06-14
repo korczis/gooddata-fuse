@@ -48,9 +48,9 @@ pub fn readdir(fs: &mut GoodDataFS,
             // Reports
             let inode = inode::Inode {
                 project: inode.project,
-                category: constants::Category::MetadataReports as u8,
+                category: ITEM.category,
                 item: offset as u32,
-                reserved: 1,
+                reserved: 0,
             };
             let fileinode: u64 = inode.into();
             reply.add(fileinode, offset, FileType::RegularFile, &name);

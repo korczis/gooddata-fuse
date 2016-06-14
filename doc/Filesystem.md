@@ -39,7 +39,7 @@ i-node has 64 bits and is used as follow
 | 21  | metadata/facts               |
 | 22  | metadata/filters             |
 | 23  | metadata/folders             |
-| 24  | metadata/kpi                 |
+| 24  | metadata/kpis                |
 | 25  | metadata/kpialert            |
 | 26  | metadata/listattributefilter |
 | 27  | metadata/metrics             |
