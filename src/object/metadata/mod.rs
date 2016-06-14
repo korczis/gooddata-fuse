@@ -1,10 +1,16 @@
+mod attribute;
 mod fact;
 mod metric;
+mod project_dashboard;
 mod report;
+mod report_definition;
 
+pub use self::attribute::*;
 pub use self::fact::*;
 pub use self::metric::*;
+pub use self::project_dashboard::*;
 pub use self::report::*;
+pub use self::report_definition::*;
 
 #[allow(non_snake_case)]
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
