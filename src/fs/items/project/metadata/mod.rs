@@ -4,7 +4,10 @@ use fs::GoodDataFS;
 use fs::helpers::create_inode_directory_attributes;
 use fs::inode;
 use fs::item;
+use fs::items::project::project_from_inode;
 use fs::constants;
+use helpers;
+use object;
 
 pub mod attributes;
 pub mod facts;
@@ -13,7 +16,6 @@ pub mod report_definitions;
 pub mod reports;
 
 use std::path::Path;
-
 
 fn getattr(_fs: &mut GoodDataFS, _req: &Request, ino: u64, reply: ReplyAttr) {
     let attr = create_inode_directory_attributes(ino);
@@ -33,7 +35,24 @@ fn lookup(_fs: &mut GoodDataFS, _req: &Request, parent: u64, _name: &Path, reply
     reply.entry(&constants::DEFAULT_TTL, &attr, 0);
 }
 
-fn read(_fs: &mut GoodDataFS, _inode: inode::Inode, _reply: ReplyData, _offset: u64, _size: u32) {}
+pub fn read(fs: &mut GoodDataFS, inode: inode::Inode, reply: ReplyData, offset: u64, size: u32) {
+
+    match inode.category {
+        x if x == constants::Category::Internal as u8 => {}
+        x if x == constants::Category::MetadataReports as u8 => {
+            // JSON REPORT
+            let project: &object::Project = &project_from_inode(fs, inode);
+
+            let report = &project.reports(&mut fs.client.connector)
+                .objects
+                .items[inode.item as usize];
+
+            let json: String = report.clone().into();
+            reply.data(helpers::read_bytes(&json, offset, size));
+        }
+        _ => println!("metadata::read() - {:?} - Unknown category", inode),
+    }
+}
 
 pub fn readdir(_fs: &mut GoodDataFS,
                _req: &Request,

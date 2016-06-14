@@ -92,7 +92,8 @@ impl Filesystem for GoodDataFS {
                            &self.get_user_json_attributes())
             }
             _ => {
-                if inode.project > 0 && inode.reserved == 0 {
+                if inode.project > 0 && inode.category == fs::constants::Category::Internal as u8 &&
+                   inode.reserved == 0 {
                     fs::projects::getattr(self, req, ino, reply)
                 } else if inode.project > 0 {
                     fs::project::getattr(self, req, ino, reply)
@@ -128,6 +129,14 @@ impl Filesystem for GoodDataFS {
             offset: u64,
             size: u32,
             reply: ReplyData) {
+
+        let inode = inode::Inode::deserialize(ino);
+        println!("GoodDataFS::read() - Reading inode {} - {:?}, fh: {}, offset: {}, size: {}",
+                 ino,
+                 inode,
+                 fh,
+                 offset,
+                 size);
 
         match ino {
             fs::constants::INODE_PROJECTS_JSON => {

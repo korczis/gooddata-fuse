@@ -188,9 +188,9 @@ pub fn lookup(fs: &mut GoodDataFS, req: &Request, parent: u64, name: &Path, repl
 }
 
 pub fn read(fs: &mut GoodDataFS,
-            _req: &Request,
+            req: &Request,
             ino: u64,
-            _fh: u64,
+            fh: u64,
             offset: u64,
             size: u32,
             reply: ReplyData) {
@@ -210,9 +210,13 @@ pub fn read(fs: &mut GoodDataFS,
             (user_roles::ITEM.read)(fs, inode, reply, offset, size);
         }
         _ => {
-            reply.error(ENOENT);
+            if inode.category >= constants::Category::Metadata as u8 &&
+               inode.category <= constants::Category::MetadataLast as u8 {
+                metadata::read(fs, inode, reply, offset, size);
+            } else {
+                reply.error(ENOENT);
+            }
         }
-
     }
 }
 
