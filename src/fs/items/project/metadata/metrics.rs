@@ -5,6 +5,7 @@ use fs::GoodDataFS;
 use fs::helpers::create_inode_directory_attributes;
 use fs::inode;
 use fs::item;
+use fs::not_implemeted;
 
 use std::path::Path;
 
@@ -26,8 +27,6 @@ fn lookup(_fs: &mut GoodDataFS, _req: &Request, parent: u64, _name: &Path, reply
     reply.entry(&constants::DEFAULT_TTL, &attr, 0);
 }
 
-fn read(_fs: &mut GoodDataFS, _inode: inode::Inode, _reply: ReplyData, _offset: u64, _size: u32) {}
-
 pub const NAME: &'static str = "metrics";
 
 pub const ITEM: item::ProjectItem = item::ProjectItem {
@@ -38,5 +37,5 @@ pub const ITEM: item::ProjectItem = item::ProjectItem {
 
     getattr: getattr,
     lookup: lookup,
-    read: read,
+    read: not_implemeted::read,
 };

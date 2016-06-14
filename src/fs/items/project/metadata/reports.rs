@@ -6,6 +6,7 @@ use fs::helpers::create_inode_directory_attributes;
 use fs::inode;
 use fs::item;
 use fs::items::project::project_from_inode;
+use fs::not_implemeted;
 use object;
 
 use std::path::Path;
@@ -27,8 +28,6 @@ fn lookup(_fs: &mut GoodDataFS, _req: &Request, parent: u64, _name: &Path, reply
     let attr = create_inode_directory_attributes(inode);
     reply.entry(&constants::DEFAULT_TTL, &attr, 0);
 }
-
-fn read(_fs: &mut GoodDataFS, _inode: inode::Inode, _reply: ReplyData, _offset: u64, _size: u32) {}
 
 pub fn readdir(fs: &mut GoodDataFS,
                _req: &Request,
@@ -74,5 +73,5 @@ pub const ITEM: item::ProjectItem = item::ProjectItem {
 
     getattr: getattr,
     lookup: lookup,
-    read: read,
+    read: not_implemeted::read,
 };
