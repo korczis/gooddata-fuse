@@ -107,6 +107,29 @@ cargo build
 cargo install
 ```
 
+## Usage
+
+```
+$ ./bin/gooddata-fs --help
+GoodData as Filesystem 0.0.5
+
+USAGE:
+    gooddata-fs [FLAGS] [OPTIONS] <username> <password> <mountpoint>
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+    -s, --server <server>    Server to use [default: https://secure.gooddata.com]
+    -t, --token <token>      Token for creating of projects
+
+ARGS:
+    <username>      GoodData Username
+    <password>      GoodData Password
+    <mountpoint>    Mount Point
+```
+
 ## Mounting GoodData as Filesystem
 
 ### Running built binary
