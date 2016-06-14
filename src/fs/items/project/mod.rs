@@ -42,7 +42,6 @@ pub fn project_from_inode<Type: Into<inode::Inode>>(fs: &GoodDataFS, ino: Type) 
 
 pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
     let inode = inode::Inode::deserialize(ino);
-    println!("fs::project::getattr() {} - {:?}", ino, inode);
 
     if inode.project > 0 {
         match inode.category {
@@ -93,7 +92,6 @@ pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
                                                             json.len() as u64,
                                                             constants::DEFAULT_CREATE_TIME);
                     reply.attr(&constants::DEFAULT_TTL, &attr);
-                    println!("Getting attributes (report.json) {:?}", inode);
                 } else {
                     println!("N A S T A L   H A P R ! ! !");
                     reply.error(ENOENT);
