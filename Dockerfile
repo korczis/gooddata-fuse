@@ -38,4 +38,4 @@ RUN make all
 
 RUN mkdir -p /gd-fs
 
-CMD ["./bin/gooddata-fs", "tomas.korcak+gem_tester@gooddata.com", "jindrisska", "/gd-fs"]
+ENTRYPOINT ["./bin/gooddata-fs"]
