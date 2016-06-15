@@ -80,6 +80,10 @@ impl Project {
         json::decode::<T>(&raw).unwrap()
     }
 
+    pub fn facts(&self, client: &mut Connector) -> ObjectsFact {
+        self.get_metadata::<ObjectsFact>(client, "fact".to_string())
+    }
+
     pub fn reports(&self, client: &mut Connector) -> ObjectsReport {
         self.get_metadata::<ObjectsReport>(client, "report".to_string())
     }

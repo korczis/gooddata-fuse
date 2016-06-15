@@ -1,4 +1,4 @@
-use fuse::{FileType, ReplyAttr, ReplyData, ReplyEntry, ReplyDirectory, Request};
+use fuse::{ReplyAttr, ReplyData, ReplyEntry, Request};
 
 use fs::GoodDataFS;
 use fs::inode;

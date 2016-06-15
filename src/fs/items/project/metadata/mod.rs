@@ -36,9 +36,19 @@ fn lookup(_fs: &mut GoodDataFS, _req: &Request, parent: u64, _name: &Path, reply
 }
 
 pub fn read(fs: &mut GoodDataFS, inode: inode::Inode, reply: ReplyData, offset: u64, size: u32) {
-
     match inode.category {
         x if x == constants::Category::Internal as u8 => {}
+        x if x == constants::Category::MetadataFacts as u8 => {
+            // JSON REPORT
+            let project: &object::Project = &project_from_inode(fs, inode);
+
+            let fact = &project.facts(&mut fs.client.connector)
+                .objects
+                .items[inode.item as usize];
+
+            let json: String = fact.clone().into();
+            reply.data(helpers::read_bytes(&json, offset, size));
+        }
         x if x == constants::Category::MetadataReports as u8 => {
             // JSON REPORT
             let project: &object::Project = &project_from_inode(fs, inode);
