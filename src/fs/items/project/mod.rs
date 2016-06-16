@@ -234,9 +234,9 @@ pub fn lookup(fs: &mut GoodDataFS, req: &Request, parent: u64, name: &Path, repl
 }
 
 pub fn read(fs: &mut GoodDataFS,
-            req: &Request,
+            _req: &Request,
             ino: u64,
-            fh: u64,
+            _fh: u64,
             offset: u64,
             size: u32,
             reply: ReplyData) {

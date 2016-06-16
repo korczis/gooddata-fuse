@@ -1,4 +1,4 @@
-use fuse::{FileType, ReplyAttr, ReplyData, ReplyEntry, ReplyDirectory, Request};
+use fuse::{FileType, ReplyAttr, ReplyEntry, ReplyDirectory, Request};
 use libc::ENOENT;
 
 use fs::constants;
