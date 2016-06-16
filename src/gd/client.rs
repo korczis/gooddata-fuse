@@ -63,7 +63,8 @@ impl GoodDataClient {
     }
 
     pub fn create_project(&mut self, project_create: object::ProjectCreate) {
-        let project = self.user.as_ref().unwrap().project_create(&mut self.connector, project_create);
+        let project =
+            self.user.as_ref().unwrap().project_create(&mut self.connector, project_create);
         match project {
             Some(p) => self.projects.as_mut().unwrap().push(p),
             None => {}
@@ -78,17 +79,17 @@ impl GoodDataClient {
         let projects = self.user.as_ref().unwrap().projects(&mut self.connector);
         self.projects = match projects {
             Some(p) => Some(p.projects),
-            None => None
+            None => None,
         }
     }
 
     pub fn report_csv(&mut self, report_definition: String) -> String {
         let payload = object::ReportReq {
-            report_req: object::ReportReqBody {
-                reportDefinition: report_definition
-            }
+            report_req: object::ReportReqBody { reportDefinition: report_definition },
         };
-        let uri = self.connector.object_by_post::<object::ReportReq, object::Uri>(url::PROJECT_EXECUTE_RAW.to_string(), payload);
+        let uri = self.connector
+            .object_by_post::<object::ReportReq, object::Uri>(url::PROJECT_EXECUTE_RAW.to_string(),
+                                                              payload);
         let mut result = self.connector.get(uri.unwrap().uri);
         self.connector.get_content(&mut result)
     }
@@ -99,10 +100,12 @@ impl GoodDataClient {
             postUserLogin: object::PostUserLoginBody {
                 login: Some(username.into()),
                 password: Some(password.into()),
-                remember: Some(false),
+                remember: Some("0".into()),
             },
         };
-        let user_login = self.connector.object_by_post::<object::PostUserLogin, object::UserLogin>(url::LOGIN.to_string(), payload);
+        let user_login = self.connector
+            .object_by_post::<object::PostUserLogin, object::UserLogin>(url::LOGIN.to_string(),
+                                                                        payload);
         let profile_link = user_login.unwrap().userLogin.profile;
 
         self.connector.refresh_token();
