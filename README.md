@@ -121,8 +121,9 @@ FLAGS:
     -V, --version    Prints version information
 
 OPTIONS:
-    -s, --server <server>    Server to use [default: https://secure.gooddata.com]
-    -t, --token <token>      Token for creating of projects
+    -c, --cache-size <cache-size>    LRU Cache Size [default: 32768]
+    -s, --server <server>            Server to use [default: https://secure.gooddata.com]
+    -t, --token <token>              Token for creating of projects
 
 ARGS:
     <username>      GoodData Username
