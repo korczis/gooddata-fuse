@@ -14,13 +14,11 @@ use hyper::header::{Accept, Cookie, ContentType, SetCookie, UserAgent, qitem};
 use hyper::mime::{Mime, TopLevel, SubLevel, Attr, Value};
 use lru_cache::LruCache;
 use rest::url;
-use rustc_serialize::Decodable;
-use rustc_serialize::Encodable;
-use rustc_serialize::json;
+use rustc_serialize::{json, Encodable, Decodable};
 use rustc_serialize::json::DecoderError;
 use std::io::Read;
 
-const CACHE_SIZE: usize = 32 * 1024;
+// const CACHE_SIZE: usize = 32 * 1024;
 
 pub struct Connector {
     pub client: Client,
@@ -34,13 +32,13 @@ pub struct Connector {
 #[allow(unused_variables)]
 #[allow(unreachable_code)]
 impl Connector {
-    pub fn new(server: String) -> Connector {
+    pub fn new(server: String, cache_size: usize) -> Connector {
         Connector {
             client: Client::new(),
             server: server,
             jar: CookieJar::new(helpers::random_string(32).as_bytes()),
             token_updated: None,
-            cache: LruCache::new(CACHE_SIZE),
+            cache: LruCache::new(cache_size),
         }
     }
 

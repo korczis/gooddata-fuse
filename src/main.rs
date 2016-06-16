@@ -30,6 +30,12 @@ fn main() {
             .takes_value(true)
             .short("t")
             .long("token"))
+        .arg(Arg::with_name("cache-size")
+            .help("LRU Cache Size")
+            .takes_value(true)
+            .short("c")
+            .long("cache-size")
+            .default_value("32768"))
         .arg(Arg::with_name("username")
             .help("GoodData Username")
             .use_delimiter(false)
@@ -51,10 +57,12 @@ fn main() {
     let password = matches.value_of("password").unwrap().to_string();
     let mountpoint = matches.value_of("mountpoint").unwrap().to_string();
     let server = matches.value_of("server").unwrap().to_string();
-    let token = matches.value_of("token").map(|token| token.to_string());
+    let token = matches.value_of("token").map(|value| value.to_string());
+    let cache_size = matches.value_of("cache-size").map(|value| value.to_string());
 
     // Create instance of GoodData HTTP Connector
-    let connector = gooddata_fs::gd::Connector::new(server);
+    let connector = gooddata_fs::gd::Connector::new(server,
+                                                    cache_size.unwrap().parse::<usize>().unwrap());
     // Create instance of GoodData REST API Client
     let mut gd = gooddata_fs::gd::GoodDataClient::new(connector, token);
     gd.connect(username, password);

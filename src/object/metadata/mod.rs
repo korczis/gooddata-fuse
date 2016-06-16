@@ -1,3 +1,5 @@
+use rustc_serialize;
+
 mod fact;
 mod metric;
 mod report;
@@ -34,4 +36,9 @@ pub struct MetadataPaging {
     pub next: Option<String>,
     pub count: Option<u32>,
     pub offset: Option<u32>,
+}
+
+
+trait MetadataQuery {
+    fn objects<T: rustc_serialize::Decodable>(&self) -> &T;
 }
