@@ -76,9 +76,9 @@ impl GoodDataFS {
 impl Filesystem for GoodDataFS {
     fn getattr(&mut self, req: &Request, ino: u64, reply: ReplyAttr) {
         let inode = inode::Inode::deserialize(ino);
-        println!("GoodDataFS::getattr() - Getting attributes {} - {:?}",
-                 ino,
-                 inode);
+        info!("GoodDataFS::getattr() - Getting attributes {} - {:?}",
+              ino,
+              inode);
 
         match ino {
             fs::constants::INODE_ROOT => fs::root::getattr(self, req, ino, reply),
@@ -106,10 +106,10 @@ impl Filesystem for GoodDataFS {
 
     fn lookup(&mut self, req: &Request, parent: u64, name: &Path, reply: ReplyEntry) {
         let parent_inode = inode::Inode::deserialize(parent);
-        println!("GoodDataFS::lookup() - Looking up parent {} - {:?}, path: {}",
-                 parent,
-                 parent_inode,
-                 name.to_str().unwrap());
+        info!("GoodDataFS::lookup() - Looking up parent {} - {:?}, path: {}",
+              parent,
+              parent_inode,
+              name.to_str().unwrap());
 
         match parent {
             fs::constants::INODE_ROOT => fs::root::lookup(self, req, parent, name, reply),
@@ -131,12 +131,12 @@ impl Filesystem for GoodDataFS {
             reply: ReplyData) {
 
         let inode = inode::Inode::deserialize(ino);
-        println!("GoodDataFS::read() - Reading inode {} - {:?}, fh: {}, offset: {}, size: {}",
-                 ino,
-                 inode,
-                 fh,
-                 offset,
-                 size);
+        info!("GoodDataFS::read() - Reading inode {} - {:?}, fh: {}, offset: {}, size: {}",
+              ino,
+              inode,
+              fh,
+              offset,
+              size);
 
         match ino {
             fs::constants::INODE_PROJECTS_JSON => {
@@ -164,11 +164,11 @@ impl Filesystem for GoodDataFS {
 
     fn readdir(&mut self, req: &Request, ino: u64, fh: u64, offset: u64, reply: ReplyDirectory) {
         let inode = inode::Inode::deserialize(ino);
-        println!("GoodDataFS::readdir() - Reading inode {} - {:?}, fh: {}, offset: {}",
-                 ino,
-                 inode,
-                 fh,
-                 offset);
+        info!("GoodDataFS::readdir() - Reading inode {} - {:?}, fh: {}, offset: {}",
+              ino,
+              inode,
+              fh,
+              offset);
 
         match ino {
             fs::constants::INODE_ROOT => {
@@ -196,10 +196,10 @@ impl Filesystem for GoodDataFS {
 
     fn mkdir(&mut self, _req: &Request, parent: u64, name: &Path, _mode: u32, reply: ReplyEntry) {
         let parent_inode = inode::Inode::deserialize(parent);
-        println!("GoodDataFS::mkdir() - Making dir in parent {} - {:?}, path: {}",
-                 parent,
-                 parent_inode,
-                 name.to_str().unwrap());
+        info!("GoodDataFS::mkdir() - Making dir in parent {} - {:?}, path: {}",
+              parent,
+              parent_inode,
+              name.to_str().unwrap());
         match parent {
             fs::constants::INODE_PROJECTS => fs::projects::create(self, name, reply),
             _ => reply.error(ENOSYS),
@@ -208,10 +208,10 @@ impl Filesystem for GoodDataFS {
 
     fn rmdir(&mut self, _req: &Request, parent: u64, name: &Path, reply: ReplyEmpty) {
         let parent_inode = inode::Inode::deserialize(parent);
-        println!("GoodDataFS::rmdir() - Removing dir in parent {} - {:?}, path: {}",
-                 parent,
-                 parent_inode,
-                 name.to_str().unwrap());
+        info!("GoodDataFS::rmdir() - Removing dir in parent {} - {:?}, path: {}",
+              parent,
+              parent_inode,
+              name.to_str().unwrap());
         match parent {
             fs::constants::INODE_PROJECTS => fs::projects::rmdir(self, name, reply),
             _ => {
@@ -224,10 +224,10 @@ impl Filesystem for GoodDataFS {
 
     fn unlink(&mut self, _req: &Request, parent: u64, name: &Path, reply: ReplyEmpty) {
         let parent_inode = inode::Inode::deserialize(parent);
-        println!("GoodDataFS::unlinl() - Removing file in parent {} - {:?}, path: {}",
-                 parent,
-                 parent_inode,
-                 name.to_str().unwrap());
+        info!("GoodDataFS::unlinl() - Removing file in parent {} - {:?}, path: {}",
+              parent,
+              parent_inode,
+              name.to_str().unwrap());
         println!("WARN: unlink() not implemented!");
         reply.ok()
         // reply.error(ENOSYS);
@@ -237,10 +237,15 @@ impl Filesystem for GoodDataFS {
 impl GoodDataFS {
     pub fn mount(self, mountpoint: String) {
         const VERSION: &'static str = env!("CARGO_PKG_VERSION");
-        println!("Mounting GoodData as Filesystem ({}), mountpoint: {}",
-                 VERSION,
-                 mountpoint);
+        info!("Mounting GoodData as Filesystem ({}), mountpoint: {}",
+              VERSION,
+              mountpoint);
 
-        fuse::mount(self, &mountpoint, &[&OsStr::new("debug")]);
+        // See https://github.com/osxfuse/osxfuse/wiki/Mount-options
+        fuse::mount(self,
+                    &mountpoint,
+                    &[// &OsStr::new("debug"),
+                      &OsStr::new("nolocalcaches"),
+                      &OsStr::new("allow_other")]);
     }
 }
