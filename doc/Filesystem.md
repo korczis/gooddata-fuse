@@ -117,7 +117,7 @@ Items marked `✓` are already implemented.
 │   │   │   ├── domains
 │   │   │   ├── etlfiles
 │   │   │   ├── executioncontexts
-│   │   │   ├── facts
+│   │   │   ├── facts ✓
 │   │   │   ├── filters
 │   │   │   ├── folders
 │   │   │   ├── kpi
@@ -127,7 +127,7 @@ Items marked `✓` are already implemented.
 │   │   │   ├── projectdashboards
 │   │   │   ├── prompts
 │   │   │   ├── reportdefinition
-│   │   │   ├── reports
+│   │   │   ├── reports ✓
 │   │   │   ├── scheduledmails
 │   │   │   ├── tabledataloads
 │   │   │   ├── tables
