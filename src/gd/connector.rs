@@ -27,21 +27,20 @@ pub struct Connector {
     pub server: String,
     pub jar: CookieJar<'static>,
     pub token_updated: Option<time::PreciseTime>,
-    pub cache: LruCache<String, Response>
+    pub cache: LruCache<String, String>,
 }
 
 #[allow(dead_code)]
 #[allow(unused_variables)]
 #[allow(unreachable_code)]
 impl Connector {
-
     pub fn new(server: String) -> Connector {
         Connector {
             client: Client::new(),
             server: server,
             jar: CookieJar::new(helpers::random_string(32).as_bytes()),
             token_updated: None,
-            cache: LruCache::new(CACHE_SIZE)
+            cache: LruCache::new(CACHE_SIZE),
         }
     }
 
@@ -85,15 +84,17 @@ impl Connector {
     }
 
     /// HTTP Method GET Wrapper
-    pub fn get_cached<S: Into<String>>(&mut self, path: S) -> &Response {
+    pub fn get_cached<S: Into<String>>(&mut self, path: S) -> &String {
         let key: String = format!("{}", path.into());
         if self.cache.contains_key(&key) {
-            let res: &Response = self.cache.get_mut(&key).unwrap();
+            let res: &String = self.cache.get_mut(&key).unwrap();
             return res;
         }
 
-        let res = self.get(key.clone());
-        self.cache.insert(key.clone(), res);
+        let mut res = self.get(key.clone());
+        let raw = self.get_content(&mut res);
+
+        self.cache.insert(key.clone(), raw);
         return self.cache.get_mut(&key.clone()).unwrap();
     }
 
@@ -108,15 +109,18 @@ impl Connector {
         let obj: Result<TypeTo, DecoderError> = json::decode(&raw.to_string());
         match obj {
             Ok(obj) => Some(obj),
-            Err(e) => None
+            Err(e) => None,
         }
     }
 
-    pub fn object_by_post<TypeFrom: Encodable, TypeTo:Decodable>(&mut self, link: String, payload: TypeFrom) -> Option<TypeTo> {
+    pub fn object_by_post<TypeFrom: Encodable, TypeTo: Decodable>(&mut self,
+                                                                  link: String,
+                                                                  payload: TypeFrom)
+                                                                  -> Option<TypeTo> {
         let mut res = self.post(link, json::encode(&payload).unwrap());
         let raw = self.get_content(&mut res);
 
-        if ! [hyper::Ok, hyper::status::StatusCode::Created].contains(&res.status) {
+        if ![hyper::Ok, hyper::status::StatusCode::Created].contains(&res.status) {
             println!("failed post content: {}", &raw);
             return None;
         }
@@ -124,7 +128,10 @@ impl Connector {
         let obj: Result<TypeTo, DecoderError> = json::decode(&raw.to_string());
         match obj {
             Ok(obj) => Some(obj),
-            Err(e) => None
+            Err(e) => {
+                println!("{:?}", e);
+                None
+            }
         }
     }
 
@@ -152,9 +159,12 @@ impl Connector {
             .send();
 
 
-        println!("GoodDataClient::post() - Response: {:?}", raw);
-        if !raw.is_ok() {
-            return self.post(uriPath, payload);
+        match raw {
+            Err(e) => {
+                println!("{:?}", e);
+                return self.post(uriPath, payload);
+            }
+            _ => {}
         }
 
         let mut res = raw.unwrap();
@@ -175,11 +185,9 @@ impl Connector {
         let raw = self.client
             .delete(&uri[..])
             .header(UserAgent(Connector::user_agent().to_owned()))
-            .header(Accept(vec![qitem(Mime(
-                TopLevel::Application,
-                SubLevel::Json,
-                vec![(Attr::Charset, Value::Utf8)]
-            ))]))
+            .header(Accept(vec![qitem(Mime(TopLevel::Application,
+                                           SubLevel::Json,
+                                           vec![(Attr::Charset, Value::Utf8)]))]))
             .header(Cookie::from_cookie_jar(&self.jar))
             .send();
 

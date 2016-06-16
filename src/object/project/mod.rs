@@ -71,13 +71,11 @@ impl Project {
                                                        client: &mut Connector,
                                                        md_type: String)
                                                        -> T {
-        let uri = format!("/gdc/md/{}/objects/query?category={}&limit=10",
+        let uri = format!("/gdc/md/{}/objects/query?category={}&limit=50",
                           self.pid(),
                           md_type);
-        let mut res = client.get(uri);
-        let raw = client.get_content(&mut res);
-
-        json::decode::<T>(&raw).unwrap()
+        let res = client.get_cached(uri);
+        json::decode::<T>(&res).unwrap()
     }
 
     pub fn facts(&self, client: &mut Connector) -> ObjectsFact {
