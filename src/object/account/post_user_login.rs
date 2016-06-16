@@ -3,7 +3,7 @@
 pub struct PostUserLoginBody {
     pub login: Option<String>,
     pub password: Option<String>,
-    pub remember: Option<bool>,
+    pub remember: Option<String>,
 }
 
 #[allow(non_snake_case)]
