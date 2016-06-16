@@ -1,3 +1,7 @@
+#[macro_use]
+extern crate log;
+extern crate env_logger;
+
 extern crate clap;
 extern crate gooddata_fs;
 extern crate users;
@@ -10,6 +14,8 @@ const DESCRIPTION: &'static str = "GoodData as Filesystem"; // env!("CARGO_PKG_D
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 fn main() {
+    env_logger::init().unwrap();
+
     // Specify program options
     let matches = App::new(DESCRIPTION)
         .version(VERSION)
