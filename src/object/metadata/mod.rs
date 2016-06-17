@@ -1,5 +1,3 @@
-use rustc_serialize;
-
 mod fact;
 mod metric;
 mod report;
@@ -38,7 +36,13 @@ pub struct MetadataPaging {
     pub offset: Option<u32>,
 }
 
+#[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
+pub struct MetadataObjectsBody<T> {
+    pub paging: super::MetadataPaging,
+    pub items: Vec<T>,
+}
 
-trait MetadataQuery {
-    fn objects<T: rustc_serialize::Decodable>(&self) -> &T;
+#[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
+pub struct MetadataObjects<T> {
+    pub objects: T,
 }

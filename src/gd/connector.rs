@@ -5,6 +5,7 @@
 extern crate time;
 extern crate hyper;
 extern crate lru_cache;
+extern crate tempfile;
 
 use cookie::CookieJar;
 use helpers;
@@ -16,16 +17,16 @@ use lru_cache::LruCache;
 use rest::url;
 use rustc_serialize::{json, Encodable, Decodable};
 use rustc_serialize::json::DecoderError;
-use std::io::Read;
+use std::fs::File;
+use std::io::{Write, Read, Seek, SeekFrom};
 
-// const CACHE_SIZE: usize = 32 * 1024;
 
 pub struct Connector {
     pub client: Client,
     pub server: String,
     pub jar: CookieJar<'static>,
     pub token_updated: Option<time::PreciseTime>,
-    pub cache: LruCache<String, String>,
+    pub cache: LruCache<String, File>,
 }
 
 #[allow(dead_code)]
@@ -82,18 +83,29 @@ impl Connector {
     }
 
     /// HTTP Method GET Wrapper
-    pub fn get_cached<S: Into<String>>(&mut self, path: S, force_update: bool) -> &String {
+    pub fn get_cached<S: Into<String>>(&mut self, path: S, force_update: bool) -> String {
         let key: String = format!("{}", path.into());
         if !force_update && self.cache.contains_key(&key) {
-            let res: &String = self.cache.get_mut(&key).unwrap();
-            return res;
+            let mut file: &File = self.cache.get_mut(&key).unwrap();
+
+            // file to start
+            file.seek(SeekFrom::Start(0)).unwrap();
+
+            // Read
+            let mut buf = String::new();
+            file.read_to_string(&mut buf).unwrap();
+
+            return buf;
         }
 
         let mut res = self.get(key.clone());
         let raw = self.get_content(&mut res);
 
-        self.cache.insert(key.clone(), raw);
-        return self.cache.get_mut(&key.clone()).unwrap();
+        let mut tmpfile: File = tempfile::tempfile().unwrap();
+        write!(tmpfile, "{}", raw).unwrap();
+
+        self.cache.insert(key.clone(), tmpfile);
+        return raw.clone();
     }
 
     pub fn object_by_get<TypeTo: Decodable>(&mut self, link: String) -> Option<TypeTo> {

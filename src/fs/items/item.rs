@@ -42,7 +42,7 @@ impl ProjectItem {
         };
 
         let fileinode: u64 = inode.into();
-        debug!("Folder::readdir() - Adding inode {} - {:?}, project {}, \
+        debug!("readdir() - Adding inode {} - {:?}, project {}, \
                   path {}",
                fileinode,
                &inode,

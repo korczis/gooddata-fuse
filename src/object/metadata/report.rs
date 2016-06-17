@@ -35,32 +35,14 @@ impl Into<String> for Report {
     }
 }
 
-#[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
-pub struct ReportPaging {
-    pub next: Option<String>,
-    pub count: Option<u32>,
-    pub offset: Option<u32>,
-}
-
-#[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
-pub struct ObjectsReportBody {
-    pub paging: super::MetadataPaging,
-    pub items: Vec<Report>,
-}
-
-impl ObjectsReportBody {
+impl super::MetadataObjectsBody<Report> {
     pub fn items(&self) -> &Vec<Report> {
         &self.items
     }
 }
 
-#[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
-pub struct ObjectsReport {
-    pub objects: ObjectsReportBody,
-}
-
-impl ObjectsReport {
-    pub fn objects(&self) -> &ObjectsReportBody {
+impl super::MetadataObjects<super::MetadataObjectsBody<Report>> {
+    pub fn objects(&self) -> &super::MetadataObjectsBody<Report> {
         &self.objects
     }
 

@@ -23,8 +23,7 @@ fn getattr(fs: &mut GoodDataFS, _req: &Request, ino: u64, reply: ReplyAttr) {
 }
 
 fn read(fs: &mut GoodDataFS, inode: inode::Inode, reply: ReplyData, offset: u64, size: u32) {
-    info!("GoodDataFS::read() - Reading {}",
-          constants::PROJECT_JSON_FILENAME);
+    info!("read() - Reading {}", constants::PROJECT_JSON_FILENAME);
 
     let project: &object::Project = &project_from_inode(fs, inode);
     let json = json::as_pretty_json(project).to_string();

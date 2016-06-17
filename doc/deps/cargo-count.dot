@@ -164,7 +164,7 @@ digraph dependencies {
 	N49 -> N33[label="",color=orange];
 	N49 -> N34[label="",color=orange];
 	N51 -> N52[label="",color=orange];
-	N52 -> N60[label=""];
+	N52 -> N60[label="",color=orange];
 	N54 -> N56[label="",color=orange];
 	N55 -> N54[label="",color=orange];
 	N55 -> N56[label="",color=orange];
@@ -178,7 +178,7 @@ digraph dependencies {
 	N58 -> N57[label="",color=orange];
 	N59 -> N33[label="",color=orange];
 	N59 -> N34[label="",color=orange];
-	N60 -> N11[label=""];
+	N60 -> N11[label="",color=orange];
 	N62 -> N66[label="",color=orange];
 	N64 -> N65[label="",color=orange];
 	N66 -> N8[label="",color=orange];

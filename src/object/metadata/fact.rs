@@ -40,25 +40,14 @@ impl Into<String> for Fact {
     }
 }
 
-#[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
-pub struct ObjectsFactBody {
-    pub paging: super::MetadataPaging,
-    pub items: Vec<Fact>,
-}
-
-impl ObjectsFactBody {
+impl super::MetadataObjectsBody<Fact> {
     pub fn items(&self) -> &Vec<Fact> {
         &self.items
     }
 }
 
-#[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
-pub struct ObjectsFact {
-    pub objects: ObjectsFactBody,
-}
-
-impl ObjectsFact {
-    pub fn objects(&self) -> &ObjectsFactBody {
+impl super::MetadataObjects<super::MetadataObjectsBody<Fact>> {
+    pub fn objects(&self) -> &super::MetadataObjectsBody<Fact> {
         &self.objects
     }
 

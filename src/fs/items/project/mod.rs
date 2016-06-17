@@ -117,11 +117,11 @@ pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
                 (metadata::report_definitions::ITEM.getattr)(fs, req, ino, reply)
             }
             _ => {
-                warn!("fs::project::getattr() - not found!");
+                warn!("getattr() - not found!");
             }
         }
     } else {
-        error!("GoodDataFS::getattr() - Not found inode {:?}", ino);
+        error!("getattr() - Not found inode {:?}", ino);
         reply.error(ENOENT);
     }
 }
@@ -165,7 +165,7 @@ pub fn lookup(fs: &mut GoodDataFS, req: &Request, parent: u64, name: &Path, repl
             if inode.category == constants::Category::MetadataFacts as u8 &&
                inode.reserved == constants::ReservedFile::KeepMe as u8 {
                 let identifier = name.to_str().unwrap().replace(".json", "");
-                debug!("fs::project::lookup() - Looking up parent {} - {:?}, name: {:?}, \
+                debug!("lookup() - Looking up parent {} - {:?}, name: {:?}, \
                           identifier: {:?}",
                        parent,
                        inode,
@@ -197,7 +197,7 @@ pub fn lookup(fs: &mut GoodDataFS, req: &Request, parent: u64, name: &Path, repl
             } else if inode.category == constants::Category::MetadataReports as u8 &&
                inode.reserved == constants::ReservedFile::KeepMe as u8 {
                 let identifier = name.to_str().unwrap().replace(".json", "");
-                debug!("fs::project::lookup() - Looking up parent {} - {:?}, name: {:?}, \
+                debug!("lookup() - Looking up parent {} - {:?}, name: {:?}, \
                           identifier: {:?}",
                        parent,
                        inode,
@@ -302,8 +302,7 @@ pub fn readdir(fs: &mut GoodDataFS,
             project::metadata::reports::readdir(fs, req, ino, fh, in_offset, reply)
         }
         _ => {
-            warn!("fs::project::readdir() - Unknow Category {}",
-                  inode.category);
+            warn!("readdir() - Unknow Category {}", inode.category);
         }
     }
 }

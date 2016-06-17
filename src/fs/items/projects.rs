@@ -86,9 +86,7 @@ pub fn readdir(fs: &mut GoodDataFS,
             item: 0,
             reserved: 0,
         };
-        info!("GoodDataFS::readdir() - Adding path {:?}, inode {:?}",
-              title,
-              inode);
+        info!("readdir() - Adding path {:?}, inode {:?}", title, inode);
         // let sanitized = re.replace_all(&title[..], "_");
         reply.add(ino, in_offset, FileType::Directory, title);
         offset += 1;

@@ -79,11 +79,26 @@ impl Project {
         json::decode::<T>(&res).unwrap()
     }
 
-    pub fn facts(&self, client: &mut Connector, force_update: bool) -> ObjectsFact {
-        self.get_metadata::<ObjectsFact>(client, "fact".to_string(), force_update)
+    pub fn get_metadata_objects<T: rustc_serialize::Decodable>
+        (&self,
+         client: &mut Connector,
+         name: String,
+         force_update: bool)
+         -> MetadataObjects<MetadataObjectsBody<T>> {
+        self.get_metadata::<MetadataObjects<MetadataObjectsBody<T>>>(client, name, force_update)
     }
 
-    pub fn reports(&self, client: &mut Connector, force_update: bool) -> ObjectsReport {
-        self.get_metadata::<ObjectsReport>(client, "report".to_string(), force_update)
+    pub fn facts(&self,
+                 client: &mut Connector,
+                 force_update: bool)
+                 -> MetadataObjects<MetadataObjectsBody<Fact>> {
+        self.get_metadata_objects::<Fact>(client, "fact".to_string(), force_update)
+    }
+
+    pub fn reports(&self,
+                   client: &mut Connector,
+                   force_update: bool)
+                   -> MetadataObjects<MetadataObjectsBody<Report>> {
+        self.get_metadata_objects::<Report>(client, "report".to_string(), force_update)
     }
 }
