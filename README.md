@@ -206,3 +206,9 @@ cargo install rustfmt
 
 - [/src/rest/url.rs](https://github.com/korczis/gooddata-fs/blob/master/src/rest/url.rs)
 - [/src/fs/constants.rs](https://github.com/korczis/gooddata-fs/blob/master/src/fs/constants.rs)
+
+## Useful commands
+
+*Print all .json files*
+
+`find gd/ -name '*.json' -exec cat {} \; | cat `
