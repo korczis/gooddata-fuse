@@ -8,6 +8,7 @@ RUN apt-get update && \
        build-essential \
        ca-certificates \
        curl \
+       fuse \
        gcc \
        graphviz \
        libc6-dev \
@@ -38,4 +39,4 @@ RUN make all
 
 RUN mkdir -p /gd-fs
 
-ENTRYPOINT ["./bin/gooddata-fs"]
+ENTRYPOINT ["./scripts/docker/gooddata-fs-wrapper.sh"]

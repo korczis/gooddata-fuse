@@ -6,4 +6,5 @@ else
     host_mountpoint=gd-fs
 fi
 
-docker run -i -t --privileged=true --rm -v "$host_mountpoint":/gd-fs gooddata-fs $1 $2 /gd-fs
+docker run -i -t --privileged=true --rm -v "$host_mountpoint":/gd-fs:shared gooddata-fs \
+    $(id -u) $(id -g) $1 $2 /gd-fs
