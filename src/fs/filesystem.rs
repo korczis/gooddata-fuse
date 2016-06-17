@@ -245,6 +245,7 @@ impl GoodDataFS {
                     &[// &OsStr::new("debug"),
                       // &OsStr::new("nolocalcaches"),
                       // &OsStr::new("allow_other"),
+                      &OsStr::new("rdonly"),
                       &OsStr::new("noappledouble")]);
     }
 }

@@ -88,10 +88,12 @@ impl Connector {
         if !force_update && self.cache.contains_key(&key) {
             let mut file: &File = self.cache.get_mut(&key).unwrap();
 
-            // file to start
+            info!("get_cached() - Reading {:?}", file);
+
+            // Seek to beginning of file
             file.seek(SeekFrom::Start(0)).unwrap();
 
-            // Read
+            // Read content of temporary file
             let mut buf = String::new();
             file.read_to_string(&mut buf).unwrap();
 
@@ -101,10 +103,12 @@ impl Connector {
         let mut res = self.get(key.clone());
         let raw = self.get_content(&mut res);
 
-        let mut tmpfile: File = tempfile::tempfile().unwrap();
-        write!(tmpfile, "{}", raw).unwrap();
+        let mut file: File = tempfile::tempfile().unwrap();
+        write!(file, "{}", raw).unwrap();
 
-        self.cache.insert(key.clone(), tmpfile);
+        info!("get_cached() - Creating {:?}", file);
+
+        self.cache.insert(key.clone(), file);
         return raw.clone();
     }
 

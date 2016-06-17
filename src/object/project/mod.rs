@@ -67,11 +67,11 @@ impl Project {
         client.object_by_get::<AssociatedRoles>(self.get_link("userRoles"))
     }
 
-    pub fn get_metadata<T: rustc_serialize::Decodable>(&self,
-                                                       client: &mut Connector,
-                                                       md_type: String,
-                                                       force_update: bool)
-                                                       -> T {
+    pub fn fetch_metadata<T: rustc_serialize::Decodable>(&self,
+                                                         client: &mut Connector,
+                                                         md_type: String,
+                                                         force_update: bool)
+                                                         -> T {
         let uri = format!("/gdc/md/{}/objects/query?category={}&limit=50",
                           self.pid(),
                           md_type);
@@ -85,7 +85,7 @@ impl Project {
          name: String,
          force_update: bool)
          -> MetadataObjects<MetadataObjectsBody<T>> {
-        self.get_metadata::<MetadataObjects<MetadataObjectsBody<T>>>(client, name, force_update)
+        self.fetch_metadata::<MetadataObjects<MetadataObjectsBody<T>>>(client, name, force_update)
     }
 
     pub fn facts(&self,
@@ -93,6 +93,13 @@ impl Project {
                  force_update: bool)
                  -> MetadataObjects<MetadataObjectsBody<Fact>> {
         self.get_metadata_objects::<Fact>(client, "fact".to_string(), force_update)
+    }
+
+    pub fn metrics(&self,
+                   client: &mut Connector,
+                   force_update: bool)
+                   -> MetadataObjects<MetadataObjectsBody<Metric>> {
+        self.get_metadata_objects::<Metric>(client, "metric".to_string(), force_update)
     }
 
     pub fn reports(&self,

@@ -22,23 +22,6 @@ pub struct MetricContent {
 }
 
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
-pub struct MetricBody {
-    pub content: MetricContent,
-    pub meta: super::MetadataMeta,
-}
-
-#[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
 pub struct Metric {
-    pub metric: MetricBody,
-}
-
-#[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
-pub struct ObjectsMetricBody {
-    pub paging: super::MetadataPaging,
-    pub items: Vec<Metric>,
-}
-
-#[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
-pub struct ObjectsMetric {
-    pub objects: ObjectsMetricBody,
+    pub metric: super::MetadataObjectBody<MetricContent>,
 }

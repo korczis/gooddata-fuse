@@ -43,6 +43,10 @@ pub struct MetadataObjectBody<T> {
 }
 
 impl<T> MetadataObjectBody<T> {
+    pub fn content(&self) -> &T {
+        &self.content
+    }
+
     pub fn meta(&self) -> &super::MetadataMeta {
         &self.meta
     }
@@ -69,6 +73,19 @@ impl<T> super::MetadataObjects<T> {
     pub fn objects(&self) -> &T {
         &self.objects
     }
+
+    // pub fn find_by_identifier2(&self, identifier: &String) -> (u32, Option<T>) {
+    //     let mut i: u32 = 0;
+    //     for item in self.objects().items().into_iter() {
+    //         if item.object().meta().identifier().as_ref().unwrap() == identifier {
+    //             return (i, Some(item.clone()));
+    //         }
+    //
+    //         i += 1;
+    //     }
+    //
+    //     (0, None)
+    // }
 }
 
 trait MetadataObject<T> {
