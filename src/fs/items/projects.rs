@@ -86,9 +86,9 @@ pub fn readdir(fs: &mut GoodDataFS,
             item: 0,
             reserved: 0,
         };
-        println!("GoodDataFS::readdir() - Adding path {:?}, inode {:?}",
-                 title,
-                 inode);
+        info!("GoodDataFS::readdir() - Adding path {:?}, inode {:?}",
+              title,
+              inode);
         // let sanitized = re.replace_all(&title[..], "_");
         reply.add(ino, in_offset, FileType::Directory, title);
         offset += 1;
@@ -145,7 +145,7 @@ pub fn rmdir(fs: &mut GoodDataFS, name: &Path, reply: ReplyEmpty) {
             reply.ok();
         }
         None => {
-            println!("WTF? Project not found: {}", title);
+            error!("WTF? Project not found: {}", title);
             reply.error(ENOENT);
         }
     }

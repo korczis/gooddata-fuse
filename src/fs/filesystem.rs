@@ -29,7 +29,7 @@ pub struct GoodDataFS {
 
 impl Drop for GoodDataFS {
     fn drop(&mut self) {
-        println!("Unmounting GoodData Filesystem");
+        info!("Unmounting GoodData Filesystem");
     }
 }
 
@@ -98,7 +98,7 @@ impl Filesystem for GoodDataFS {
                 } else if inode.project > 0 {
                     fs::project::getattr(self, req, ino, reply)
                 } else {
-                    println!("getattr() - HAPR")
+                    error!("getattr() - HAPR")
                 }
             }
         }
@@ -140,7 +140,7 @@ impl Filesystem for GoodDataFS {
 
         match ino {
             fs::constants::INODE_PROJECTS_JSON => {
-                // println!("off: {}, size {}", offset, size);
+                debug!("off: {}, size {}", offset, size);
                 let json = format!("{}\n",
                                    json::as_pretty_json(&self.client.projects_fetch_if_none())
                                        .to_string());
@@ -156,7 +156,7 @@ impl Filesystem for GoodDataFS {
                 if inode.project > 0 {
                     fs::project::read(self, req, ino, fh, offset, size, reply);
                 } else {
-                    println!("read() - HAPR")
+                    warn!("read() - HAPR")
                 }
             }
         }
@@ -215,7 +215,7 @@ impl Filesystem for GoodDataFS {
         match parent {
             fs::constants::INODE_PROJECTS => fs::projects::rmdir(self, name, reply),
             _ => {
-                println!("WARN: rmdir() not implemented!");
+                warn!("GoodDataFS::rmdir() - not implemented!");
                 reply.ok()
                 // reply.error(ENOSYS)
             }
@@ -228,7 +228,7 @@ impl Filesystem for GoodDataFS {
               parent,
               parent_inode,
               name.to_str().unwrap());
-        println!("WARN: unlink() not implemented!");
+        warn!("GoodDataFS::unlink() - not implemented!");
         reply.ok()
         // reply.error(ENOSYS);
     }
@@ -244,8 +244,10 @@ impl GoodDataFS {
         // See https://github.com/osxfuse/osxfuse/wiki/Mount-options
         fuse::mount(self,
                     &mountpoint,
-                    &[// &OsStr::new("debug"),
-                      &OsStr::new("nolocalcaches"),
-                      &OsStr::new("allow_other")]);
+                    &[
+                        // &OsStr::new("debug"),
+                        // &OsStr::new("nolocalcaches"),
+                        // &OsStr::new("allow_other"),
+                    ]);
     }
 }

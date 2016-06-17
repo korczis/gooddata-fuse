@@ -61,7 +61,7 @@ impl Connector {
             .header(Cookie::from_cookie_jar(&self.jar))
             .send();
 
-        println!("GoodDataClient::get() - Response: {:?}", raw);
+        info!("GoodDataClient::get() - Response: {:?}", raw);
         if !raw.is_ok() {
             return self.get(uriPath);
         }
@@ -119,7 +119,7 @@ impl Connector {
         let raw = self.get_content(&mut res);
 
         if ![hyper::Ok, hyper::status::StatusCode::Created].contains(&res.status) {
-            println!("failed post content: {}", &raw);
+            error!("failed post content: {}", &raw);
             return None;
         }
 
@@ -127,7 +127,7 @@ impl Connector {
         match obj {
             Ok(obj) => Some(obj),
             Err(e) => {
-                println!("{:?}", e);
+                error!("GoodData::Connector::object_by_post() - {:?}", e);
                 None
             }
         }
@@ -159,7 +159,7 @@ impl Connector {
 
         match raw {
             Err(e) => {
-                println!("{:?}", e);
+                error!("GoodData::connector::port() - {:?}", e);
                 return self.post(uriPath, payload);
             }
             _ => {}
@@ -189,7 +189,7 @@ impl Connector {
             .header(Cookie::from_cookie_jar(&self.jar))
             .send();
 
-        println!("GoodDataClient::delete() - Response: {:?}", raw);
+        info!("GoodDataClient::delete() - Response: {:?}", raw);
 
         let mut res = raw.unwrap();
         assert_eq!(res.status, hyper::Ok);
@@ -203,7 +203,7 @@ impl Connector {
     /// Get HTTP Response body
     pub fn get_content(&mut self, res: &mut hyper::client::Response) -> String {
         let mut buf = String::new();
-        println!("{:?}", res.read_to_string(&mut buf));
+        debug!("{:?}", res.read_to_string(&mut buf));
         match res.read_to_string(&mut buf) {
             Ok(_) => (),
             Err(_) => panic!("I give up."),
@@ -218,10 +218,10 @@ impl Connector {
 
         let obj = res;
 
-        println!("{:?}", obj);
+        debug!("{:?}", obj);
 
         let content = self.get_content(obj);
-        println!("{}", content);
+        debug!("{}", content);
     }
 
     /// Update Cookies in Jar from HTTP Response
@@ -252,14 +252,14 @@ impl Connector {
             .header(Cookie::from_cookie_jar(&self.jar))
             .send();
 
-        println!("{:?}", raw);
+        debug!("{:?}", raw);
         if !raw.is_ok() {
             return self.refresh_token();
         }
 
         let mut res = raw.unwrap();
         assert_eq!(res.status, hyper::Ok);
-        println!("{:?}", res);
+        debug!("{:?}", res);
 
         self.print_response(&mut res);
         self.update_cookie_jar(&res);

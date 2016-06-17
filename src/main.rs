@@ -14,8 +14,6 @@ const DESCRIPTION: &'static str = "GoodData as Filesystem"; // env!("CARGO_PKG_D
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 fn main() {
-    env_logger::init().unwrap();
-
     // Specify program options
     let matches = App::new(DESCRIPTION)
         .version(VERSION)
@@ -51,6 +49,8 @@ fn main() {
             .required(true)
             .index(3))
         .get_matches();
+
+    env_logger::init().unwrap();
 
     // Parse required program options
     let username = matches.value_of("username").unwrap().to_string();

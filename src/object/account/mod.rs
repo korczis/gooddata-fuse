@@ -73,7 +73,7 @@ impl AccountSetting {
         let u = connector.object_by_post::<object::ProjectCreate, object::Uri>(url::PROJECTS.to_string(), project_create);
         if u.is_some() {
             let uri = u.unwrap().uri;
-            println!("Uri: {}", uri);
+            debug!("Uri: {}", uri);
             for _ in 1..10 {
                 let p = connector.object_by_get::<object::Project>(uri.clone());
                 if p.is_some() {
@@ -90,7 +90,7 @@ impl AccountSetting {
     pub fn project_delete(&self, connector: &mut Connector, project_delete: object::Project) {
         let title = project_delete.project().meta().title().as_ref().unwrap();
         let uri = project_delete.get_link("self");
-        println!("Deleting project: {} ({})", title, uri);
+        info!("Deleting project: {} ({})", title, uri);
         connector.delete(uri);
     }
 }

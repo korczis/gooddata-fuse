@@ -42,12 +42,12 @@ impl ProjectItem {
         };
 
         let fileinode: u64 = inode.into();
-        println!("Folder::readdir() - Adding inode {} - {:?}, project {}, \
+        debug!("Folder::readdir() - Adding inode {} - {:?}, project {}, \
                   path {}",
-                 fileinode,
-                 &inode,
-                 project_idx,
-                 self.path);
+               fileinode,
+               &inode,
+               project_idx,
+               self.path);
 
         reply.add(fileinode, *offset, self.item_type, self.path);
     }

@@ -54,7 +54,7 @@ pub fn readdir(fs: &mut GoodDataFS,
             let fileinode: u64 = inode.into();
             reply.add(fileinode, offset, FileType::RegularFile, &name);
 
-            println!("Adding inode {:?}, name {:?}", inode, &name);
+            info!("Adding inode {:?}, name {:?}", inode, &name);
 
             offset += 1;
         }

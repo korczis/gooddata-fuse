@@ -14,6 +14,16 @@ fn connect() -> gd::GoodDataClient {
     gd
 }
 
+fn connect_to_staging3() -> gd::GoodDataClient {
+    // Create instance of GoodData HTTP Connector
+    let connector = gooddata_fs::gd::Connector::new("https://staging3.intgdc.com".to_string(),
+                                                    LRU_SIZE);
+    // Create instance of GoodData REST API Client
+    let mut gd = gooddata_fs::gd::GoodDataClient::new(connector, None);
+    gd.connect("tomas.korcak+gem_tester@gooddata.com", "jindrisska");
+    gd
+}
+
 #[test]
 fn it_creates_connector() {
     // Create instance of GoodData HTTP Connector
@@ -50,6 +60,14 @@ fn it_creates_client_with_token() {
 #[test]
 fn client_can_connect() {
     let gd = connect();
+    assert_eq!(gd.projects.is_some(), false);
+    assert_eq!(gd.user.is_some(), true);
+
+}
+
+#[test]
+fn client_can_connect_to_staging3() {
+    let gd = connect_to_staging3();
     assert_eq!(gd.projects.is_some(), false);
     assert_eq!(gd.user.is_some(), true);
 

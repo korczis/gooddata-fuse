@@ -112,11 +112,11 @@ impl GoodDataClient {
         let user = self.connector.object_by_get::<object::AccountSetting>(profile_link).unwrap();
         self.user = Some(user);
         // let csv = self.report_csv("/gdc/md/GoodSalesDemo/obj/30834".to_string());
-        // println!("CSV: {}", csv);
+        // debug!("CSV: {}", csv);
     }
 
     pub fn disconnect(&mut self) {
-        println!("GoodDataClient::disconnect() - Disconnecting from GoodData Platform");
+        info!("GoodDataClient::disconnect() - Disconnecting from GoodData Platform");
         self.user = None;
         self.projects = None;
     }

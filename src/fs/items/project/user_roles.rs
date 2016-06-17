@@ -46,8 +46,8 @@ fn lookup(fs: &mut GoodDataFS, _req: &Request, parent: u64, _name: &Path, reply:
 }
 
 fn read(fs: &mut GoodDataFS, inode: inode::Inode, reply: ReplyData, offset: u64, size: u32) {
-    println!("GoodDataFS::read() - Reading {}",
-             constants::USER_ROLES_JSON_FILENAME);
+    info!("GoodDataFS::read() - Reading {}",
+          constants::USER_ROLES_JSON_FILENAME);
 
     let project: &object::Project = &project_from_inode(fs, inode);
 

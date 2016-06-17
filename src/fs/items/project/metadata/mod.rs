@@ -60,7 +60,7 @@ pub fn read(fs: &mut GoodDataFS, inode: inode::Inode, reply: ReplyData, offset: 
             let json: String = report.clone().into();
             reply.data(helpers::read_bytes(&json, offset, size));
         }
-        _ => println!("metadata::read() - {:?} - Unknown category", inode),
+        _ => warn!("metadata::read() - {:?} - Unknown category", inode),
     }
 }
 
