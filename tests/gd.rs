@@ -65,13 +65,13 @@ fn client_can_connect() {
 
 }
 
-#[test]
-fn client_can_connect_to_staging3() {
-    let gd = connect_to_staging3();
-    assert_eq!(gd.projects.is_some(), false);
-    assert_eq!(gd.user.is_some(), true);
-
-}
+// #[test]
+// fn client_can_connect_to_staging3() {
+//     let gd = connect_to_staging3();
+//     assert_eq!(gd.projects.is_some(), false);
+//     assert_eq!(gd.user.is_some(), true);
+//
+// }
 
 #[test]
 fn client_can_disconnect() {
