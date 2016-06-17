@@ -24,7 +24,7 @@ WORKDIR /rust
 
 RUN sudo curl -sSf https://static.rust-lang.org/rustup.sh | sudo sh -s -- -y --verbose
 
-COPY . .
+COPY Makefile .
 
 RUN ldconfig -vv
 
@@ -32,6 +32,8 @@ RUN ldconfig -vv
 
 # Install dependencies
 RUN make install_deps
+
+COPY . .
 
 # Build all gooddata-fs stuff
 RUN make all
