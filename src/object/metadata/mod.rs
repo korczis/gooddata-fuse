@@ -37,12 +37,40 @@ pub struct MetadataPaging {
 }
 
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
+pub struct MetadataObjectBody<T> {
+    pub content: T,
+    pub meta: super::MetadataMeta,
+}
+
+impl<T> MetadataObjectBody<T> {
+    pub fn meta(&self) -> &super::MetadataMeta {
+        &self.meta
+    }
+}
+
+#[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
 pub struct MetadataObjectsBody<T> {
     pub paging: super::MetadataPaging,
     pub items: Vec<T>,
 }
 
+impl<T> super::MetadataObjectsBody<T> {
+    pub fn items(&self) -> &Vec<T> {
+        &self.items
+    }
+}
+
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
 pub struct MetadataObjects<T> {
     pub objects: T,
+}
+
+impl<T> super::MetadataObjects<T> {
+    pub fn objects(&self) -> &T {
+        &self.objects
+    }
+}
+
+trait MetadataObject<T> {
+    fn object(&self) -> &T;
 }

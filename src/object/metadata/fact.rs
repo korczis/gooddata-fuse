@@ -7,29 +7,17 @@ pub struct ExprItem {
 }
 
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
-pub struct FactcContent {
+pub struct FactContent {
     pub expr: Option<Vec<ExprItem>>,
 }
 
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
-pub struct FactBody {
-    pub content: FactcContent,
-    pub meta: super::MetadataMeta,
-}
-
-impl FactBody {
-    pub fn meta(&self) -> &super::MetadataMeta {
-        &self.meta
-    }
-}
-
-#[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
 pub struct Fact {
-    pub fact: FactBody,
+    pub fact: super::MetadataObjectBody<FactContent>,
 }
 
 impl Fact {
-    pub fn fact(&self) -> &FactBody {
+    pub fn object(&self) -> &super::MetadataObjectBody<FactContent> {
         &self.fact
     }
 }
@@ -40,21 +28,11 @@ impl Into<String> for Fact {
     }
 }
 
-impl super::MetadataObjectsBody<Fact> {
-    pub fn items(&self) -> &Vec<Fact> {
-        &self.items
-    }
-}
-
 impl super::MetadataObjects<super::MetadataObjectsBody<Fact>> {
-    pub fn objects(&self) -> &super::MetadataObjectsBody<Fact> {
-        &self.objects
-    }
-
     pub fn find_by_identifier(&self, identifier: &String) -> (u32, Option<Fact>) {
         let mut i: u32 = 0;
         for item in self.objects().items().into_iter() {
-            if item.fact().meta().identifier().as_ref().unwrap() == identifier {
+            if item.object().meta().identifier().as_ref().unwrap() == identifier {
                 return (i, Some(item.clone()));
             }
 
