@@ -209,6 +209,10 @@ cargo install rustfmt
 
 ## Useful commands
 
+*Show tree*
+
+`tree -as gd/`
+
 *Print all .json files*
 
 `find gd/ -name '*.json' -exec cat {} \; | cat `
