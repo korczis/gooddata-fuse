@@ -10,6 +10,7 @@ target/
 
 # Scripts
 scripts/
+!scripts/docker/gooddata-fs-wrapper.sh
 
 # Mount point
 gd-fs
