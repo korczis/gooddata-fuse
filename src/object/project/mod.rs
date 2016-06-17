@@ -69,20 +69,21 @@ impl Project {
 
     pub fn get_metadata<T: rustc_serialize::Decodable>(&self,
                                                        client: &mut Connector,
-                                                       md_type: String)
+                                                       md_type: String,
+                                                       force_update: bool)
                                                        -> T {
         let uri = format!("/gdc/md/{}/objects/query?category={}&limit=50",
                           self.pid(),
                           md_type);
-        let res = client.get_cached(uri);
+        let res = client.get_cached(uri, force_update);
         json::decode::<T>(&res).unwrap()
     }
 
-    pub fn facts(&self, client: &mut Connector) -> ObjectsFact {
-        self.get_metadata::<ObjectsFact>(client, "fact".to_string())
+    pub fn facts(&self, client: &mut Connector, force_update: bool) -> ObjectsFact {
+        self.get_metadata::<ObjectsFact>(client, "fact".to_string(), force_update)
     }
 
-    pub fn reports(&self, client: &mut Connector) -> ObjectsReport {
-        self.get_metadata::<ObjectsReport>(client, "report".to_string())
+    pub fn reports(&self, client: &mut Connector, force_update: bool) -> ObjectsReport {
+        self.get_metadata::<ObjectsReport>(client, "report".to_string(), force_update)
     }
 }

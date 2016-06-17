@@ -82,9 +82,9 @@ impl Connector {
     }
 
     /// HTTP Method GET Wrapper
-    pub fn get_cached<S: Into<String>>(&mut self, path: S) -> &String {
+    pub fn get_cached<S: Into<String>>(&mut self, path: S, force_update: bool) -> &String {
         let key: String = format!("{}", path.into());
-        if self.cache.contains_key(&key) {
+        if !force_update && self.cache.contains_key(&key) {
             let res: &String = self.cache.get_mut(&key).unwrap();
             return res;
         }

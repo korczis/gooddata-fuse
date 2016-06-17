@@ -77,7 +77,7 @@ pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
                     // JSON REPORT
                     let project: &object::Project = &project_from_inode(fs, ino);
 
-                    let fact = &project.facts(&mut fs.client.connector)
+                    let fact = &project.facts(&mut fs.client.connector, false)
                         .objects
                         .items[inode.item as usize];
 
@@ -100,7 +100,7 @@ pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
                     // JSON REPORT
                     let project: &object::Project = &project_from_inode(fs, ino);
 
-                    let report = &project.reports(&mut fs.client.connector)
+                    let report = &project.reports(&mut fs.client.connector, false)
                         .objects
                         .items[inode.item as usize];
 
@@ -174,7 +174,7 @@ pub fn lookup(fs: &mut GoodDataFS, req: &Request, parent: u64, name: &Path, repl
 
                 let project: &object::Project = &project_from_inode(fs, parent);
 
-                let (index, fact) = project.facts(&mut fs.client.connector)
+                let (index, fact) = project.facts(&mut fs.client.connector, false)
                     .find_by_identifier(&identifier);
                 debug!("{:?}", fact);
 
@@ -206,7 +206,7 @@ pub fn lookup(fs: &mut GoodDataFS, req: &Request, parent: u64, name: &Path, repl
 
                 let project: &object::Project = &project_from_inode(fs, parent);
 
-                let (index, report) = project.reports(&mut fs.client.connector)
+                let (index, report) = project.reports(&mut fs.client.connector, false)
                     .find_by_identifier(&identifier);
                 debug!("{:?}", report);
 

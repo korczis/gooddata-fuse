@@ -37,7 +37,7 @@ pub fn readdir(fs: &mut GoodDataFS,
                mut reply: ReplyDirectory) {
     let inode = inode::Inode::deserialize(ino);
     let project: &object::Project = &project_from_inode(fs, ino);
-    let report_items = project.facts(&mut fs.client.connector);
+    let report_items = project.facts(&mut fs.client.connector, true);
 
     let mut offset = in_offset;
     if offset + 1 < report_items.objects.items.len() as u64 {

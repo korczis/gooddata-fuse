@@ -42,7 +42,7 @@ pub fn read(fs: &mut GoodDataFS, inode: inode::Inode, reply: ReplyData, offset: 
             // JSON REPORT
             let project: &object::Project = &project_from_inode(fs, inode);
 
-            let fact = &project.facts(&mut fs.client.connector)
+            let fact = &project.facts(&mut fs.client.connector, false)
                 .objects
                 .items[inode.item as usize];
 
@@ -53,7 +53,7 @@ pub fn read(fs: &mut GoodDataFS, inode: inode::Inode, reply: ReplyData, offset: 
             // JSON REPORT
             let project: &object::Project = &project_from_inode(fs, inode);
 
-            let report = &project.reports(&mut fs.client.connector)
+            let report = &project.reports(&mut fs.client.connector, false)
                 .objects
                 .items[inode.item as usize];
 
