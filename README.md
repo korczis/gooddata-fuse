@@ -173,6 +173,12 @@ RUST_BACKTRACE=1 RUST_LOG=debug gooddata-fs joe.doe@gooddata.com secretpassword 
 
 ### Docker
 
+Make the parent mount point 'shared'. For example, if the gooddata mountpoint
+is `/mnt/gd-fs`, do:
+```
+sudo mount --make-shared $(df --output=target /mnt/gd-fs | tail -n1)
+```
+
 ```
 cd scripts/docker
 ./build-local.sh
