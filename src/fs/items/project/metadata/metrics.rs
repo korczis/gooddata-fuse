@@ -2,7 +2,6 @@ use fuse::{FileType, ReplyAttr, ReplyData, ReplyDirectory, ReplyEntry, Request};
 
 use fs::constants;
 use fs::GoodDataFS;
-use fs::helpers::create_inode_directory_attributes;
 use fs::inode;
 use fs::item;
 use fs::items::project::project_from_inode;

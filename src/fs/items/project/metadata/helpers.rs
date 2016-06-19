@@ -1,15 +1,10 @@
-use fuse::{FileType, ReplyAttr, ReplyData, ReplyDirectory, ReplyEntry, Request};
+use fuse::{ReplyAttr, ReplyEntry, Request};
 
 use fs::constants;
 use fs::GoodDataFS;
 use fs::helpers::create_inode_directory_attributes;
 use fs::inode;
 use fs::item;
-use fs::items::project::project_from_inode;
-use fs::not_implemeted;
-use helpers;
-use object;
-
 use std::path::Path;
 
 pub fn getattr(_fs: &mut GoodDataFS, _req: &Request, ino: u64, reply: ReplyAttr) {
@@ -17,8 +12,8 @@ pub fn getattr(_fs: &mut GoodDataFS, _req: &Request, ino: u64, reply: ReplyAttr)
     reply.attr(&constants::DEFAULT_TTL, &attr);
 }
 
-pub fn lookup(fs: &mut GoodDataFS,
-              req: &Request,
+pub fn lookup(_fs: &mut GoodDataFS,
+              _req: &Request,
               parent: u64,
               _name: &Path,
               reply: ReplyEntry,
