@@ -6,7 +6,7 @@ For more information about GoodData Filesystem Structure see [detailed documenta
 
 ## Notice
 
-**This is not official GoodData project nor is supported or recommended for production use. You have been warned.**
+**This is not official GoodData project is not supported and/or recommended for production use. You have been warned.**
 
 ## Status
 
@@ -208,6 +208,10 @@ cargo install rustfmt
 - [/src/fs/constants.rs](https://github.com/korczis/gooddata-fs/blob/master/src/fs/constants.rs)
 
 ## Useful commands
+
+*Show tree*
+
+`tree -as gd/`
 
 *Print all .json files*
 
