@@ -1,4 +1,4 @@
-use fuse::{FileType, ReplyAttr, ReplyDirectory, ReplyEntry, Request};
+use fuse::{FileType, ReplyAttr, ReplyData, ReplyDirectory, ReplyEntry, Request};
 
 use fs::constants;
 use fs::GoodDataFS;
@@ -7,6 +7,7 @@ use fs::inode;
 use fs::item;
 use fs::items::project::project_from_inode;
 use fs::not_implemeted;
+use helpers;
 use object;
 
 use std::path::Path;
@@ -27,6 +28,17 @@ fn lookup(_fs: &mut GoodDataFS, _req: &Request, parent: u64, _name: &Path, reply
 
     let attr = create_inode_directory_attributes(inode);
     reply.entry(&constants::DEFAULT_TTL, &attr, 0);
+}
+
+pub fn read(fs: &mut GoodDataFS, inode: inode::Inode, reply: ReplyData, offset: u64, size: u32) {
+    let project: &object::Project = &project_from_inode(fs, inode);
+
+    let metric = &project.metrics(&mut fs.client.connector, false)
+        .objects
+        .items[inode.item as usize];
+
+    let json: String = metric.clone().into();
+    reply.data(helpers::read_bytes(&json, offset, size));
 }
 
 pub fn readdir(fs: &mut GoodDataFS,
