@@ -8,6 +8,7 @@ use fs::constants;
 
 pub mod attributes;
 pub mod facts;
+pub mod helpers;
 pub mod metrics;
 pub mod report_definitions;
 pub mod reports;

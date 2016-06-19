@@ -94,3 +94,7 @@ impl<T> super::MetadataObjects<T> {
 trait MetadataObject<T: Into<String>> {
     fn object(&self) -> &T;
 }
+
+trait MetadataObjectRootKey {
+    fn root_key() -> String;
+}
