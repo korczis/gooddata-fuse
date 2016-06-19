@@ -91,6 +91,6 @@ impl<T> super::MetadataObjects<T> {
     // }
 }
 
-trait MetadataObject<T: Into<String>> {
-    fn object(&self) -> &T;
+trait MetadataObject<T> {
+    fn object(&self) -> &MetadataObjectBody<T>;
 }

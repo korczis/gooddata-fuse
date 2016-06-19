@@ -80,33 +80,32 @@ impl Project {
         json::decode::<T>(&res).unwrap()
     }
 
-    pub fn get_metadata_objects<T: rustc_serialize::Decodable>
-        (&self,
-         client: &mut Connector,
-         name: String,
-         force_update: bool)
-         -> MetadataObjects<MetadataObjectsBody<T>> {
+    pub fn get_metadata_objects<T: rustc_serialize::Decodable>(&self,
+                                                               client: &mut Connector,
+                                                               name: String,
+                                                               force_update: bool)
+                                                               -> &MetadataObjectsBody<T> {
         self.fetch_metadata::<MetadataObjects<MetadataObjectsBody<T>>>(client, name, force_update)
+            .objects()
     }
 
-    pub fn facts(&self,
-                 client: &mut Connector,
-                 force_update: bool)
-                 -> MetadataObjects<MetadataObjectsBody<Fact>> {
-        self.get_metadata_objects::<Fact>(client, "fact".to_string(), force_update)
+    pub fn get_metadata_items<T: rustc_serialize::Decodable>(&self,
+                                                             client: &mut Connector,
+                                                             name: String,
+                                                             force_update: bool)
+                                                             -> &Vec<T> {
+        self.get_metadata_objects::<T>(client, name, force_update).items()
     }
 
-    pub fn metrics(&self,
-                   client: &mut Connector,
-                   force_update: bool)
-                   -> MetadataObjects<MetadataObjectsBody<Metric>> {
-        self.get_metadata_objects::<Metric>(client, "metric".to_string(), force_update)
+    pub fn facts(&self, client: &mut Connector, force_update: bool) -> &Vec<Fact> {
+        self.get_metadata_items::<Fact>(client, "fact".to_string(), force_update)
     }
 
-    pub fn reports(&self,
-                   client: &mut Connector,
-                   force_update: bool)
-                   -> MetadataObjects<MetadataObjectsBody<Report>> {
-        self.get_metadata_objects::<Report>(client, "report".to_string(), force_update)
+    pub fn metrics(&self, client: &mut Connector, force_update: bool) -> &Vec<Metric> {
+        self.get_metadata_items::<Metric>(client, "metric".to_string(), force_update)
+    }
+
+    pub fn reports(&self, client: &mut Connector, force_update: bool) -> &Vec<Report> {
+        self.get_metadata_items::<Report>(client, "report".to_string(), force_update)
     }
 }

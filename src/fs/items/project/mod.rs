@@ -77,9 +77,7 @@ pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
                     // JSON REPORT
                     let project: &object::Project = &project_from_inode(fs, ino);
 
-                    let fact = &project.facts(&mut fs.client.connector, false)
-                        .objects
-                        .items[inode.item as usize];
+                    let fact = &project.facts(&mut fs.client.connector, false)[inode.item as usize];
 
                     let json: String = fact.clone().into();
                     let attr = create_inode_file_attributes(ino,
@@ -97,9 +95,8 @@ pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
                     // JSON REPORT
                     let project: &object::Project = &project_from_inode(fs, ino);
 
-                    let metric = &project.metrics(&mut fs.client.connector, false)
-                        .objects
-                        .items[inode.item as usize];
+                    let metric =
+                        &project.metrics(&mut fs.client.connector, false)[inode.item as usize];
 
                     let json: String = metric.clone().into();
                     let attr = create_inode_file_attributes(ino,
@@ -117,9 +114,8 @@ pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
                     // JSON REPORT
                     let project: &object::Project = &project_from_inode(fs, ino);
 
-                    let report = &project.reports(&mut fs.client.connector, false)
-                        .objects
-                        .items[inode.item as usize];
+                    let report =
+                        &project.reports(&mut fs.client.connector, false)[inode.item as usize];
 
                     let json: String = report.clone().into();
                     let attr = create_inode_file_attributes(ino,
@@ -191,8 +187,8 @@ pub fn lookup(fs: &mut GoodDataFS, req: &Request, parent: u64, name: &Path, repl
 
                 let project: &object::Project = &project_from_inode(fs, parent);
 
-                let (index, fact) = project.facts(&mut fs.client.connector, false)
-                    .find_by_identifier(&identifier);
+                let (index, fact) =
+                    metadata::find_by_identifier(project.facts(&mut fs.client.connector, false));
                 debug!("{:?}", fact);
 
                 if !fact.is_some() {

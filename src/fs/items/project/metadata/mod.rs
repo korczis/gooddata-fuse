@@ -5,6 +5,7 @@ use fs::helpers::create_inode_directory_attributes;
 use fs::inode;
 use fs::item;
 use fs::constants;
+use object;
 
 pub mod attributes;
 pub mod facts;
@@ -139,3 +140,18 @@ pub const ITEM: item::ProjectItem = item::ProjectItem {
     lookup: lookup,
     read: read,
 };
+
+pub fn find_by_identifier<T: Clone>(items: &Vec<T>,
+                                    identifier: String)
+                                    -> (Option<u32>, Option<T>) {
+    let mut i: u32 = 0;
+    for item in items.into_iter() {
+        if item.object().meta().identifier().as_ref().unwrap() == identifier {
+            return (Some(i), Some(item.clone()));
+        }
+
+        i += 1;
+    }
+
+    (None, None)
+}
