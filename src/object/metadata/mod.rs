@@ -1,13 +1,11 @@
 // use rustc_serialize;
 // use rustc_serialize::json;
 
-mod fact;
-mod metric;
-mod report;
-
-pub use self::fact::*;
-pub use self::metric::*;
-pub use self::report::*;
+pub mod attribute;
+pub mod fact;
+pub mod metric;
+pub mod report;
+pub mod report_definition;
 
 #[allow(non_snake_case)]
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
@@ -95,6 +93,6 @@ trait MetadataObject<T: Into<String>> {
     fn object(&self) -> &T;
 }
 
-trait MetadataObjectRootKey {
+pub trait MetadataObjectRootKey {
     fn root_key() -> String;
 }

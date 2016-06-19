@@ -28,6 +28,14 @@ impl Into<String> for Fact {
     }
 }
 
+pub const NAME: &'static str = "fact";
+
+impl super::MetadataObjectRootKey for Fact {
+    fn root_key() -> String {
+        NAME.to_string()
+    }
+}
+
 impl super::MetadataObjects<super::MetadataObjectsBody<Fact>> {
     pub fn find_by_identifier(&self, identifier: &String) -> (u32, Option<Fact>) {
         let mut i: u32 = 0;

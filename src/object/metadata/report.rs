@@ -23,6 +23,14 @@ impl Into<String> for Report {
     }
 }
 
+pub const NAME: &'static str = "report";
+
+impl super::MetadataObjectRootKey for Report {
+    fn root_key() -> String {
+        NAME.to_string()
+    }
+}
+
 impl super::MetadataObjects<super::MetadataObjectsBody<Report>> {
     pub fn find_by_identifier(&self, identifier: &String) -> (u32, Option<Report>) {
         let mut i: u32 = 0;

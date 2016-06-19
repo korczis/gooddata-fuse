@@ -6,6 +6,7 @@ use fs::helpers::create_inode_directory_attributes;
 use fs::inode;
 use fs::item;
 use fs::not_implemeted;
+use object;
 
 use std::path::Path;
 
@@ -27,13 +28,11 @@ fn lookup(_fs: &mut GoodDataFS, _req: &Request, parent: u64, _name: &Path, reply
     reply.entry(&constants::DEFAULT_TTL, &attr, 0);
 }
 
-pub const NAME: &'static str = "attributes";
-
 pub const ITEM: item::ProjectItem = item::ProjectItem {
     category: constants::Category::MetadataAttributes as u8,
     reserved: constants::ReservedFile::KeepMe as u8,
     item_type: FileType::Directory,
-    path: NAME,
+    path: object::attribute::NAME,
 
     getattr: getattr,
     lookup: lookup,

@@ -65,13 +65,11 @@ pub fn readdir(fs: &mut GoodDataFS,
     reply.ok();
 }
 
-pub const NAME: &'static str = "metrics";
-
 pub const ITEM: item::ProjectItem = item::ProjectItem {
     category: constants::Category::MetadataMetrics as u8,
     reserved: constants::ReservedFile::KeepMe as u8,
     item_type: FileType::Directory,
-    path: NAME,
+    path: object::metric::NAME,
 
     getattr: getattr,
     lookup: lookup,

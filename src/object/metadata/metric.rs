@@ -40,6 +40,14 @@ impl Into<String> for Metric {
     }
 }
 
+pub const NAME: &'static str = "metric";
+
+impl super::MetadataObjectRootKey for Metric {
+    fn root_key() -> String {
+        NAME.to_string()
+    }
+}
+
 impl super::MetadataObjects<super::MetadataObjectsBody<Metric>> {
     pub fn find_by_identifier(&self, identifier: &String) -> (u32, Option<Metric>) {
         let mut i: u32 = 0;
