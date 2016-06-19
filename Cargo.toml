@@ -16,6 +16,7 @@ cookie = "0.2.4"
 env_logger = "0.3"
 fuse = "0.2"
 hyper = "0.9"
+Inflector = "0.2.0" # https://github.com/whatisinternet/inflector
 libc = { version = "0.2", default-features = false }
 log = "0.3"
 lru-cache = "0.0.7"

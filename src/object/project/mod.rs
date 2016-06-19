@@ -76,6 +76,7 @@ impl Project {
                           self.pid(),
                           md_type);
         let res = client.get_cached(uri, force_update);
+
         json::decode::<T>(&res).unwrap()
     }
 

@@ -39,7 +39,7 @@ pub fn read(fs: &mut GoodDataFS, inode: inode::Inode, reply: ReplyData, offset: 
     match inode.category {
         x if x == constants::Category::Internal as u8 => {}
         x if x == constants::Category::MetadataFacts as u8 => {
-            // JSON REPORT
+            // JSON FACTS
             let project: &object::Project = &project_from_inode(fs, inode);
 
             let fact = &project.facts(&mut fs.client.connector, false)
@@ -47,6 +47,17 @@ pub fn read(fs: &mut GoodDataFS, inode: inode::Inode, reply: ReplyData, offset: 
                 .items[inode.item as usize];
 
             let json: String = fact.clone().into();
+            reply.data(helpers::read_bytes(&json, offset, size));
+        }
+        x if x == constants::Category::MetadataMetrics as u8 => {
+            // JSON METRICS
+            let project: &object::Project = &project_from_inode(fs, inode);
+
+            let metric = &project.metrics(&mut fs.client.connector, false)
+                .objects
+                .items[inode.item as usize];
+
+            let json: String = metric.clone().into();
             reply.data(helpers::read_bytes(&json, offset, size));
         }
         x if x == constants::Category::MetadataReports as u8 => {

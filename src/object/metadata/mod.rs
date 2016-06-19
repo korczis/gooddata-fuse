@@ -1,3 +1,6 @@
+// use rustc_serialize;
+// use rustc_serialize::json;
+
 mod fact;
 mod metric;
 mod report;
@@ -88,6 +91,6 @@ impl<T> super::MetadataObjects<T> {
     // }
 }
 
-trait MetadataObject<T> {
+trait MetadataObject<T: Into<String>> {
     fn object(&self) -> &T;
 }

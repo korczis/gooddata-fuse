@@ -1,11 +1,13 @@
-use fuse::{FileType, ReplyAttr, ReplyEntry, Request};
+use fuse::{FileType, ReplyAttr, ReplyDirectory, ReplyEntry, Request};
 
 use fs::constants;
 use fs::GoodDataFS;
 use fs::helpers::create_inode_directory_attributes;
 use fs::inode;
 use fs::item;
+use fs::items::project::project_from_inode;
 use fs::not_implemeted;
+use object;
 
 use std::path::Path;
 
@@ -25,6 +27,40 @@ fn lookup(_fs: &mut GoodDataFS, _req: &Request, parent: u64, _name: &Path, reply
 
     let attr = create_inode_directory_attributes(inode);
     reply.entry(&constants::DEFAULT_TTL, &attr, 0);
+}
+
+pub fn readdir(fs: &mut GoodDataFS,
+               _req: &Request,
+               ino: u64,
+               _fh: u64,
+               in_offset: u64,
+               mut reply: ReplyDirectory) {
+    let inode = inode::Inode::deserialize(ino);
+    let project: &object::Project = &project_from_inode(fs, ino);
+    let report_items = project.metrics(&mut fs.client.connector, true);
+
+    let mut offset = in_offset;
+    if offset + 1 < report_items.objects.items.len() as u64 {
+        for item in report_items.objects.items.into_iter().skip(offset as usize) {
+            let name = format!("{}.json", item.metric.meta.identifier.unwrap());
+
+            // Reports
+            let inode = inode::Inode {
+                project: inode.project,
+                category: ITEM.category,
+                item: offset as u32,
+                reserved: 0,
+            };
+            let fileinode: u64 = inode.into();
+            reply.add(fileinode, offset, FileType::RegularFile, &name);
+
+            info!("Adding inode {:?}, name {:?}", inode, &name);
+
+            offset += 1;
+        }
+    }
+
+    reply.ok();
 }
 
 pub const NAME: &'static str = "metrics";

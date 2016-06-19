@@ -106,7 +106,9 @@ impl Connector {
         let mut file: File = tempfile::tempfile().unwrap();
         write!(file, "{}", raw).unwrap();
 
-        info!("get_cached() - Creating {:?}", file);
+        info!("get_cached() - Creating {:?} - Content: {:?}",
+              file,
+              raw.clone());
 
         self.cache.insert(key.clone(), file);
         return raw.clone();

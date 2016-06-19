@@ -1,8 +1,10 @@
+use rustc_serialize::json;
+
 #[allow(non_snake_case)]
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
 pub struct MetricTreePosition {
-    pub column: Option<u8>,
-    pub line: Option<u8>,
+    pub column: Option<u16>,
+    pub line: Option<u16>,
 }
 
 #[allow(non_snake_case)]
@@ -24,4 +26,31 @@ pub struct MetricContent {
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
 pub struct Metric {
     pub metric: super::MetadataObjectBody<MetricContent>,
+}
+
+impl Metric {
+    pub fn object(&self) -> &super::MetadataObjectBody<MetricContent> {
+        &self.metric
+    }
+}
+
+impl Into<String> for Metric {
+    fn into(self) -> String {
+        format!("{}\n", json::as_pretty_json(&self).to_string())
+    }
+}
+
+impl super::MetadataObjects<super::MetadataObjectsBody<Metric>> {
+    pub fn find_by_identifier(&self, identifier: &String) -> (u32, Option<Metric>) {
+        let mut i: u32 = 0;
+        for item in self.objects().items().into_iter() {
+            if item.object().meta().identifier().as_ref().unwrap() == identifier {
+                return (i, Some(item.clone()));
+            }
+
+            i += 1;
+        }
+
+        (0, None)
+    }
 }
