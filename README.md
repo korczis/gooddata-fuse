@@ -6,7 +6,7 @@ For more information about GoodData Filesystem Structure see [detailed documenta
 
 ## Notice
 
-**This is not official GoodData project is not supported and/or recommended for production use. You have been warned.**
+**This is not official GoodData project neither is supported and/or recommended for production use. You have been warned.**
 
 ## Status
 
