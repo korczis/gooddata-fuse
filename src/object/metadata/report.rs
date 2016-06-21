@@ -17,6 +17,12 @@ impl Report {
     }
 }
 
+impl super::MetadataObjectGetter<ReportContent> for Report {
+    fn object(&self) -> &super::MetadataObjectBody<ReportContent> {
+        &self.report
+    }
+}
+
 impl Into<String> for Report {
     fn into(self) -> String {
         format!("{}\n", json::as_pretty_json(&self).to_string())

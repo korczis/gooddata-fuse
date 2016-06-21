@@ -34,6 +34,12 @@ impl Metric {
     }
 }
 
+impl super::MetadataObjectGetter<MetricContent> for Metric {
+    fn object(&self) -> &super::MetadataObjectBody<MetricContent> {
+        &self.metric
+    }
+}
+
 impl Into<String> for Metric {
     fn into(self) -> String {
         format!("{}\n", json::as_pretty_json(&self).to_string())
