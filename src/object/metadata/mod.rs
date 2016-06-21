@@ -104,12 +104,16 @@ pub struct MetadataQueryBody<T> {
     pub items: Vec<T>,
 }
 
-pub trait MetadataQueryBodyGetters<T> {
+pub trait MetadataQueryBodyGetters<T, U>
+    where T: MetadataObjectGetter<U>
+{
     fn paging(&self) -> &super::MetadataPaging;
     fn items(&self) -> &Vec<T>;
 }
 
-impl<T> MetadataQueryBodyGetters<T> for MetadataQueryBody<T> {
+impl<T, U> MetadataQueryBodyGetters<T, U> for MetadataQueryBody<T>
+    where T: MetadataObjectGetter<U>
+{
     fn paging(&self) -> &super::MetadataPaging {
         &self.paging
     }
@@ -159,7 +163,7 @@ impl<T> super::MetadataQuery<T> {
     // }
 }
 
-trait MetadataObjectGetter<T> {
+pub trait MetadataObjectGetter<T> {
     fn object(&self) -> &MetadataObjectBody<T>;
 }
 
