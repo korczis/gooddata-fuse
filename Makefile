@@ -9,6 +9,12 @@ else
 	LINKER_TOOL = ldd
 endif
 
+## UTILS ##
+# Recursive wildcard function
+# http://blog.jgc.org/2011/07/gnu-make-recursive-wildcard-function.html
+rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) \
+  $(filter $(subst *,%,$2),$d))
+
 all: build test strip upx stats size deps outdated doc dot
 
 install_deps:
@@ -88,7 +94,7 @@ test:
 update:
 		cargo multi update
 
-upx:
+upx: ./target/release/gooddata-fs
 		upx -fq --ultra-brute --best -o ./bin/gooddata-fs ./target/release/gooddata-fs
 
 watch:
