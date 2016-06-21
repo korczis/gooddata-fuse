@@ -1,5 +1,5 @@
 mod account;
-mod metadata;
+pub mod metadata;
 mod project;
 mod report_req;
 mod traits;
