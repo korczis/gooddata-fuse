@@ -24,6 +24,16 @@ pub struct MetadataMeta {
     pub contributor: Option<String>,
 }
 
+pub trait MetadataMetaGetters {
+    fn identifier(&self) -> &Option<String>;
+}
+
+impl MetadataMetaGetters for MetadataMeta {
+    fn identifier(&self) -> &Option<String> {
+        &self.identifier
+    }
+}
+
 impl MetadataMeta {
     pub fn identifier(&self) -> &Option<String> {
         &self.identifier
@@ -37,10 +47,44 @@ pub struct MetadataPaging {
     pub offset: Option<u32>,
 }
 
+pub trait MetadataPagingGetters {
+    fn next(&self) -> &Option<String>;
+    fn count(&self) -> &Option<u32>;
+    fn offset(&self) -> &Option<u32>;
+}
+
+impl MetadataPagingGetters for MetadataPaging {
+    fn next(&self) -> &Option<String> {
+        &self.next
+    }
+
+    fn count(&self) -> &Option<u32> {
+        &self.count
+    }
+    fn offset(&self) -> &Option<u32> {
+        &self.offset
+    }
+}
+
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
 pub struct MetadataObjectBody<T> {
     pub content: T,
     pub meta: super::MetadataMeta,
+}
+
+pub trait MetadataObjectBodyGetters<T> {
+    fn content(&self) -> &T;
+    fn meta(&self) -> &super::MetadataMeta;
+}
+
+impl<T> MetadataObjectBodyGetters<T> for MetadataObjectBody<T> {
+    fn content(&self) -> &T {
+        &self.content
+    }
+
+    fn meta(&self) -> &super::MetadataMeta {
+        &self.meta
+    }
 }
 
 impl<T> MetadataObjectBody<T> {
@@ -59,6 +103,21 @@ pub struct MetadataObjectsBody<T> {
     pub items: Vec<T>,
 }
 
+pub trait MetadataObjectsBodyGetters<T> {
+    fn paging(&self) -> &super::MetadataPaging;
+    fn items(&self) -> &Vec<T>;
+}
+
+impl<T> MetadataObjectsBodyGetters<T> for MetadataObjectsBody<T> {
+    fn paging(&self) -> &super::MetadataPaging {
+        &self.paging
+    }
+
+    fn items(&self) -> &Vec<T> {
+        &self.items
+    }
+}
+
 impl<T> super::MetadataObjectsBody<T> {
     pub fn items(&self) -> &Vec<T> {
         &self.items
@@ -68,6 +127,16 @@ impl<T> super::MetadataObjectsBody<T> {
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
 pub struct MetadataObjects<T> {
     pub objects: T,
+}
+
+pub trait MetadataObjectsGetter<T> {
+    fn objects(&self) -> &T;
+}
+
+impl<T> MetadataObjectsGetter<T> for MetadataObjects<T> {
+    fn objects(&self) -> &T {
+        &self.objects
+    }
 }
 
 impl<T> super::MetadataObjects<T> {
@@ -89,8 +158,8 @@ impl<T> super::MetadataObjects<T> {
     // }
 }
 
-trait MetadataObject<T: Into<String>> {
-    fn object(&self) -> &T;
+trait MetadataObjectGetter<T> {
+    fn object(&self) -> &MetadataObjectBody<T>;
 }
 
 pub trait MetadataObjectRootKey {

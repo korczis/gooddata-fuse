@@ -22,6 +22,12 @@ impl Fact {
     }
 }
 
+impl super::MetadataObjectGetter<FactContent> for Fact {
+    fn object(&self) -> &super::MetadataObjectBody<FactContent> {
+        &self.fact
+    }
+}
+
 impl Into<String> for Fact {
     fn into(self) -> String {
         format!("{}\n", json::as_pretty_json(&self).to_string())
