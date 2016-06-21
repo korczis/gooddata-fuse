@@ -24,7 +24,7 @@ impl Fact {
 
 impl super::MetadataObjectGetter<FactContent> for Fact {
     fn object(&self) -> &super::MetadataObjectBody<FactContent> {
-        &self.fact
+        &self.object()
     }
 }
 

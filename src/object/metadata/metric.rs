@@ -36,7 +36,7 @@ impl Metric {
 
 impl super::MetadataObjectGetter<MetricContent> for Metric {
     fn object(&self) -> &super::MetadataObjectBody<MetricContent> {
-        &self.metric
+        &self.object()
     }
 }
 

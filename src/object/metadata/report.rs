@@ -19,7 +19,7 @@ impl Report {
 
 impl super::MetadataObjectGetter<ReportContent> for Report {
     fn object(&self) -> &super::MetadataObjectBody<ReportContent> {
-        &self.report
+        &self.object()
     }
 }
 
