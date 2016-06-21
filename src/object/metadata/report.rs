@@ -31,7 +31,7 @@ impl super::MetadataObjectRootKey for Report {
     }
 }
 
-impl super::MetadataObjects<super::MetadataObjectsBody<Report>> {
+impl super::MetadataQuery<super::MetadataQueryBody<Report>> {
     pub fn find_by_identifier(&self, identifier: &String) -> (u32, Option<Report>) {
         let mut i: u32 = 0;
         for item in self.objects().items().into_iter() {

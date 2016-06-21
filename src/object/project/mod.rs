@@ -87,36 +87,36 @@ impl Project {
          client: &mut Connector,
          name: String,
          force_update: bool)
-         -> MetadataObjects<MetadataObjectsBody<T>> {
-        self.fetch_metadata::<MetadataObjects<MetadataObjectsBody<T>>>(client, name, force_update)
+         -> MetadataQuery<MetadataQueryBody<T>> {
+        self.fetch_metadata::<MetadataQuery<MetadataQueryBody<T>>>(client, name, force_update)
     }
 
     pub fn metadata<T: rustc_serialize::Decodable + super::metadata::MetadataObjectRootKey>
         (&self,
          client: &mut Connector,
          force_update: bool)
-         -> MetadataObjects<MetadataObjectsBody<T>> {
+         -> MetadataQuery<MetadataQueryBody<T>> {
         self.get_metadata_objects::<T>(client, T::root_key().to_string(), force_update)
     }
 
     pub fn facts(&self,
                  client: &mut Connector,
                  force_update: bool)
-                 -> MetadataObjects<MetadataObjectsBody<metadata::fact::Fact>> {
+                 -> MetadataQuery<MetadataQueryBody<metadata::fact::Fact>> {
         self.metadata::<metadata::fact::Fact>(client, force_update)
     }
 
     pub fn metrics(&self,
                    client: &mut Connector,
                    force_update: bool)
-                   -> MetadataObjects<MetadataObjectsBody<metadata::metric::Metric>> {
+                   -> MetadataQuery<MetadataQueryBody<metadata::metric::Metric>> {
         self.metadata::<metadata::metric::Metric>(client, force_update)
     }
 
     pub fn reports(&self,
                    client: &mut Connector,
                    force_update: bool)
-                   -> MetadataObjects<MetadataObjectsBody<metadata::report::Report>> {
+                   -> MetadataQuery<MetadataQueryBody<metadata::report::Report>> {
         self.metadata::<metadata::report::Report>(client, force_update)
     }
 }

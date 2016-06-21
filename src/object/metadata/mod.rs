@@ -61,6 +61,7 @@ impl MetadataPagingGetters for MetadataPaging {
     fn count(&self) -> &Option<u32> {
         &self.count
     }
+
     fn offset(&self) -> &Option<u32> {
         &self.offset
     }
@@ -98,17 +99,17 @@ impl<T> MetadataObjectBody<T> {
 }
 
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
-pub struct MetadataObjectsBody<T> {
+pub struct MetadataQueryBody<T> {
     pub paging: super::MetadataPaging,
     pub items: Vec<T>,
 }
 
-pub trait MetadataObjectsBodyGetters<T> {
+pub trait MetadataQueryBodyGetters<T> {
     fn paging(&self) -> &super::MetadataPaging;
     fn items(&self) -> &Vec<T>;
 }
 
-impl<T> MetadataObjectsBodyGetters<T> for MetadataObjectsBody<T> {
+impl<T> MetadataQueryBodyGetters<T> for MetadataQueryBody<T> {
     fn paging(&self) -> &super::MetadataPaging {
         &self.paging
     }
@@ -118,28 +119,28 @@ impl<T> MetadataObjectsBodyGetters<T> for MetadataObjectsBody<T> {
     }
 }
 
-impl<T> super::MetadataObjectsBody<T> {
+impl<T> super::MetadataQueryBody<T> {
     pub fn items(&self) -> &Vec<T> {
         &self.items
     }
 }
 
 #[derive(RustcDecodable, RustcEncodable, Debug, Clone)]
-pub struct MetadataObjects<T> {
+pub struct MetadataQuery<T> {
     pub objects: T,
 }
 
-pub trait MetadataObjectsGetter<T> {
+pub trait MetadataQueryGetters<T> {
     fn objects(&self) -> &T;
 }
 
-impl<T> MetadataObjectsGetter<T> for MetadataObjects<T> {
+impl<T> MetadataQueryGetters<T> for MetadataQuery<T> {
     fn objects(&self) -> &T {
         &self.objects
     }
 }
 
-impl<T> super::MetadataObjects<T> {
+impl<T> super::MetadataQuery<T> {
     pub fn objects(&self) -> &T {
         &self.objects
     }

@@ -48,7 +48,7 @@ impl super::MetadataObjectRootKey for Metric {
     }
 }
 
-impl super::MetadataObjects<super::MetadataObjectsBody<Metric>> {
+impl super::MetadataQuery<super::MetadataQueryBody<Metric>> {
     pub fn find_by_identifier(&self, identifier: &String) -> (u32, Option<Metric>) {
         let mut i: u32 = 0;
         for item in self.objects().items().into_iter() {
