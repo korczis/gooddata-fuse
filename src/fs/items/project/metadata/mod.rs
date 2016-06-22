@@ -5,6 +5,7 @@ use fs::helpers::create_inode_directory_attributes;
 use fs::inode;
 use fs::item;
 use fs::constants;
+use object;
 
 pub mod attributes;
 pub mod facts;
@@ -28,7 +29,7 @@ pub const ITEM_METADATA_ATTRIBUTES_DIR: MetadataItem = MetadataItem {
     item: 0,
     reserved: constants::ReservedFile::KeepMe as u8,
     item_type: FileType::Directory,
-    path: constants::PROJECT_METADATA_ATTRIBUTES_DIR,
+    path: object::metadata::attribute::NAME,
 };
 
 pub const ITEM_METADATA_FACTS_DIR: MetadataItem = MetadataItem {
@@ -36,7 +37,7 @@ pub const ITEM_METADATA_FACTS_DIR: MetadataItem = MetadataItem {
     item: 0,
     reserved: constants::ReservedFile::KeepMe as u8,
     item_type: FileType::Directory,
-    path: constants::PROJECT_METADATA_FACTS_DIR,
+    path: object::metadata::fact::NAME,
 };
 
 pub const ITEM_METADATA_METRICS_DIR: MetadataItem = MetadataItem {
@@ -44,7 +45,7 @@ pub const ITEM_METADATA_METRICS_DIR: MetadataItem = MetadataItem {
     item: 0,
     reserved: constants::ReservedFile::KeepMe as u8,
     item_type: FileType::Directory,
-    path: constants::PROJECT_METADATA_METRICS_DIR,
+    path: object::metadata::metric::NAME,
 };
 
 pub const ITEM_METADATA_REPORTS_DIR: MetadataItem = MetadataItem {
@@ -52,7 +53,7 @@ pub const ITEM_METADATA_REPORTS_DIR: MetadataItem = MetadataItem {
     item: 0,
     reserved: constants::ReservedFile::KeepMe as u8,
     item_type: FileType::Directory,
-    path: constants::PROJECT_METADATA_REPORTS_DIR,
+    path: object::metadata::report::NAME,
 };
 
 pub const ITEM_METADATA_REPORT_DEFINITIONS_DIR: MetadataItem = MetadataItem {
@@ -60,7 +61,7 @@ pub const ITEM_METADATA_REPORT_DEFINITIONS_DIR: MetadataItem = MetadataItem {
     item: 0,
     reserved: constants::ReservedFile::KeepMe as u8,
     item_type: FileType::Directory,
-    path: constants::PROJECT_METADATA_REPORT_DEFINITIONS_DIR,
+    path: object::metadata::report_definition::NAME,
 };
 
 pub const ITEMS: [MetadataItem; 5] = [ITEM_METADATA_ATTRIBUTES_DIR,
@@ -91,6 +92,9 @@ fn lookup(_fs: &mut GoodDataFS, _req: &Request, parent: u64, _name: &Path, reply
 pub fn read(fs: &mut GoodDataFS, inode: inode::Inode, reply: ReplyData, offset: u64, size: u32) {
     match inode.category {
         x if x == constants::Category::Internal as u8 => {}
+        x if x == constants::Category::MetadataAttributes as u8 => {
+            attributes::read(fs, inode, reply, offset, size)
+        }
         x if x == constants::Category::MetadataFacts as u8 => {
             facts::read(fs, inode, reply, offset, size)
         }

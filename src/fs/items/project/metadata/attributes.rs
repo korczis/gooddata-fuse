@@ -1,9 +1,11 @@
-use fuse::{FileType, ReplyAttr, ReplyEntry, Request};
+use fuse::{FileType, ReplyAttr, ReplyData, ReplyDirectory, ReplyEntry, Request};
 
 use fs::constants;
 use fs::GoodDataFS;
+use fs::inode;
 use fs::item;
-use fs::not_implemeted;
+use fs::items::project::project_from_inode;
+use helpers;
 use object;
 
 use std::path::Path;
@@ -16,6 +18,51 @@ fn lookup(fs: &mut GoodDataFS, req: &Request, parent: u64, name: &Path, reply: R
     super::helpers::lookup(fs, req, parent, name, reply, &ITEM)
 }
 
+pub fn read(fs: &mut GoodDataFS, inode: inode::Inode, reply: ReplyData, offset: u64, size: u32) {
+    let project: &object::Project = &project_from_inode(fs, inode);
+
+    let fact = &project.attributes(&mut fs.client.connector, false)
+        .objects
+        .items[inode.item as usize];
+
+    let json: String = fact.clone().into();
+    reply.data(helpers::read_bytes(&json, offset, size));
+}
+
+pub fn readdir(fs: &mut GoodDataFS,
+               _req: &Request,
+               ino: u64,
+               _fh: u64,
+               in_offset: u64,
+               mut reply: ReplyDirectory) {
+    let inode = inode::Inode::deserialize(ino);
+    let project: &object::Project = &project_from_inode(fs, ino);
+    let attribute_items = project.attributes(&mut fs.client.connector, true);
+
+    let mut offset = in_offset;
+    if offset + 1 < attribute_items.objects.items.len() as u64 {
+        for item in attribute_items.objects.items.into_iter().skip(offset as usize) {
+            let name = format!("{}.json", item.attribute.meta.identifier.unwrap());
+
+            // Reports
+            let inode = inode::Inode {
+                project: inode.project,
+                category: ITEM.category,
+                item: offset as u32,
+                reserved: 0,
+            };
+            let fileinode: u64 = inode.into();
+            reply.add(fileinode, offset, FileType::RegularFile, &name);
+
+            info!("Adding inode {:?}, name {:?}", inode, &name);
+
+            offset += 1;
+        }
+    }
+
+    reply.ok();
+}
+
 pub const ITEM: item::ProjectItem = item::ProjectItem {
     category: constants::Category::MetadataAttributes as u8,
     reserved: constants::ReservedFile::KeepMe as u8,
@@ -24,5 +71,5 @@ pub const ITEM: item::ProjectItem = item::ProjectItem {
 
     getattr: getattr,
     lookup: lookup,
-    read: not_implemeted::read,
+    read: read,
 };

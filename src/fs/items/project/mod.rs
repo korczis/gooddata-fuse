@@ -70,6 +70,26 @@ pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
             x if x == constants::Category::MetadataAttributes as u8 => {
                 (metadata::attributes::ITEM.getattr)(fs, req, ino, reply)
             }
+            x if x == constants::Category::MetadataAttributes as u8 => {
+                if inode.reserved == constants::ReservedFile::KeepMe as u8 {
+                    (metadata::attributes::ITEM.getattr)(fs, req, ino, reply)
+                } else if inode.reserved == 0 {
+                    // JSON ATTRIBUTE
+                    let project: &object::Project = &project_from_inode(fs, ino);
+
+                    let fact = &project.attributes(&mut fs.client.connector, false)
+                        .objects
+                        .items[inode.item as usize];
+
+                    let json: String = fact.clone().into();
+                    let attr = create_inode_file_attributes(ino,
+                                                            json.len() as u64,
+                                                            constants::DEFAULT_CREATE_TIME);
+                    reply.attr(&constants::DEFAULT_TTL, &attr);
+                } else {
+                    reply.error(ENOENT);
+                }
+            }
             x if x == constants::Category::MetadataFacts as u8 => {
                 if inode.reserved == constants::ReservedFile::KeepMe as u8 {
                     (metadata::facts::ITEM.getattr)(fs, req, ino, reply)
@@ -157,19 +177,19 @@ pub fn lookup(fs: &mut GoodDataFS, req: &Request, parent: u64, name: &Path, repl
         Some(constants::PROJECT_METADATA_DIR) => {
             (metadata::ITEM.lookup)(fs, req, parent, name, reply)
         }
-        Some(constants::PROJECT_METADATA_ATTRIBUTES_DIR) => {
+        Some(object::metadata::attribute::NAME) => {
             (metadata::attributes::ITEM.lookup)(fs, req, parent, name, reply)
         }
-        Some(constants::PROJECT_METADATA_FACTS_DIR) => {
+        Some(object::metadata::fact::NAME) => {
             (metadata::facts::ITEM.lookup)(fs, req, parent, name, reply)
         }
-        Some(constants::PROJECT_METADATA_METRICS_DIR) => {
+        Some(object::metadata::metric::NAME) => {
             (metadata::metrics::ITEM.lookup)(fs, req, parent, name, reply)
         }
-        Some(constants::PROJECT_METADATA_REPORTS_DIR) => {
+        Some(object::metadata::report::NAME) => {
             (metadata::reports::ITEM.lookup)(fs, req, parent, name, reply)
         }
-        Some(constants::PROJECT_METADATA_REPORT_DEFINITIONS_DIR) => {
+        Some(object::metadata::report_definition::NAME) => {
             (metadata::report_definitions::ITEM.lookup)(fs, req, parent, name, reply)
         }
         Some(constants::USER_PERMISSIONS_JSON_FILENAME) => {
@@ -179,7 +199,39 @@ pub fn lookup(fs: &mut GoodDataFS, req: &Request, parent: u64, name: &Path, repl
             (user_roles::ITEM.lookup)(fs, req, parent, name, reply)
         }
         _ => {
-            if inode.category == constants::Category::MetadataFacts as u8 &&
+            if inode.category == constants::Category::MetadataAttributes as u8 &&
+               inode.reserved == constants::ReservedFile::KeepMe as u8 {
+                let identifier = name.to_str().unwrap().replace(".json", "");
+                debug!("lookup() - Looking up parent {} - {:?}, name: {:?}, \
+                          identifier: {:?}",
+                       parent,
+                       inode,
+                       name,
+                       identifier);
+
+                let project: &object::Project = &project_from_inode(fs, parent);
+
+                let (index, attribute) = project.attributes(&mut fs.client.connector, false)
+                    .find_by_identifier(&identifier);
+                debug!("{:?}", attribute);
+
+                if !attribute.is_some() {
+                    reply.error(ENOENT);
+                    return;
+                }
+
+                let inode = inode::Inode {
+                    project: inode.project,
+                    category: constants::Category::MetadataAttributes as u8,
+                    item: index,
+                    reserved: 0,
+                };
+                let json: String = attribute.unwrap().into();
+                let attr = create_inode_file_attributes(inode::Inode::serialize(&inode),
+                                                        json.len() as u64,
+                                                        constants::DEFAULT_CREATE_TIME);
+                reply.entry(&constants::DEFAULT_TTL, &attr, 0);
+            } else if inode.category == constants::Category::MetadataFacts as u8 &&
                inode.reserved == constants::ReservedFile::KeepMe as u8 {
                 let identifier = name.to_str().unwrap().replace(".json", "");
                 debug!("lookup() - Looking up parent {} - {:?}, name: {:?}, \
@@ -343,6 +395,9 @@ pub fn readdir(fs: &mut GoodDataFS,
         }
         x if x == constants::Category::Metadata as u8 => {
             project::metadata::readdir(fs, req, ino, fh, in_offset, reply)
+        }
+        x if x == constants::Category::MetadataAttributes as u8 => {
+            project::metadata::attributes::readdir(fs, req, ino, fh, in_offset, reply)
         }
         x if x == constants::Category::MetadataFacts as u8 => {
             project::metadata::facts::readdir(fs, req, ino, fh, in_offset, reply)
