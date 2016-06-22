@@ -1,1 +1,1 @@
-pub const NAME: &'static str = "definitions";
+pub const NAME: &'static str = "reportDefinition";

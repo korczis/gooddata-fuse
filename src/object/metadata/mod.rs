@@ -2,7 +2,9 @@
 // use rustc_serialize::json;
 
 pub mod attribute;
+pub mod display_form;
 pub mod fact;
+pub mod key;
 pub mod metric;
 pub mod report;
 pub mod report_definition;
