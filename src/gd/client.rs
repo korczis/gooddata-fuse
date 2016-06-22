@@ -12,6 +12,8 @@ use super::connector::Connector;
 pub struct GoodDataClient {
     pub connector: Connector,
     pub token: Option<String>,
+    pub environment: Option<String>,
+    pub driver: Option<String>,
     pub user: Option<object::AccountSetting>,
     pub projects: Option<Vec<object::Project>>,
 }
@@ -27,10 +29,16 @@ impl Drop for GoodDataClient {
 #[allow(unreachable_code)]
 impl GoodDataClient {
     /// Create Instance of GoodData Client
-    pub fn new(connector: Connector, token: Option<String>) -> GoodDataClient {
+    pub fn new(connector: Connector,
+               token: Option<String>,
+               environment: Option<String>,
+               driver: Option<String>)
+               -> GoodDataClient {
         GoodDataClient {
             connector: connector,
             token: token,
+            environment: environment,
+            driver: driver,
             user: None,
             projects: None,
         }

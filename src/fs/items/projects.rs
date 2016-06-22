@@ -115,8 +115,8 @@ pub fn create(fs: &mut GoodDataFS, name: &Path, reply: ReplyEntry) {
                 project: ProjectCreateBody {
                     content: ProjectCreateContent {
                         guidedNavigation: "1".to_string(),
-                        environment: "TESTING".to_string(),
-                        driver: "Pg".to_string(),
+                        environment: fs.client().environment.clone().unwrap(),
+                        driver: fs.client().driver.clone().unwrap(),
                         authorizationToken: token,
                     },
                     meta: ProjectCreateMeta {

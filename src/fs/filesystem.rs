@@ -243,9 +243,11 @@ impl GoodDataFS {
         fuse::mount(self,
                     &mountpoint,
                     &[// &OsStr::new("debug"),
-                      // &OsStr::new("nolocalcaches"),
-                      // &OsStr::new("allow_other"),
+                      &OsStr::new("nolocalcaches"),
+                      &OsStr::new("allow_other"),
                       &OsStr::new("rdonly"),
-                      &OsStr::new("noappledouble")]);
+                      &OsStr::new("noappledouble"),
+                      &OsStr::new("noapplexattr"),
+                      &OsStr::new("volname=GoodData")]);
     }
 }
