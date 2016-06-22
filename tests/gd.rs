@@ -9,17 +9,7 @@ fn connect() -> gd::GoodDataClient {
     let connector = gooddata_fs::gd::Connector::new(gooddata_fs::rest::url::SERVER.to_string(),
                                                     LRU_SIZE);
     // Create instance of GoodData REST API Client
-    let mut gd = gooddata_fs::gd::GoodDataClient::new(connector, None);
-    gd.connect("tomas.korcak+gem_tester@gooddata.com", "jindrisska");
-    gd
-}
-
-fn connect_to_staging3() -> gd::GoodDataClient {
-    // Create instance of GoodData HTTP Connector
-    let connector = gooddata_fs::gd::Connector::new("https://staging3.intgdc.com".to_string(),
-                                                    LRU_SIZE);
-    // Create instance of GoodData REST API Client
-    let mut gd = gooddata_fs::gd::GoodDataClient::new(connector, None);
+    let mut gd = gooddata_fs::gd::GoodDataClient::new(connector, None, None, None);
     gd.connect("tomas.korcak+gem_tester@gooddata.com", "jindrisska");
     gd
 }
@@ -38,7 +28,7 @@ fn it_creates_client() {
     let connector = gooddata_fs::gd::Connector::new(gooddata_fs::rest::url::SERVER.to_string(),
                                                     LRU_SIZE);
     // Create instance of GoodData REST API Client
-    let gd = gd::GoodDataClient::new(connector, None);
+    let gd = gd::GoodDataClient::new(connector, None, None, None);
     assert_eq!(gd.projects.is_some(), false);
     assert_eq!(gd.user.is_some(), false);
     assert_eq!(gd.token.is_some(), false);
@@ -51,7 +41,7 @@ fn it_creates_client_with_token() {
                                                     LRU_SIZE);
     let token = Some("xxx".to_string());
     // Create instance of GoodData REST API Client
-    let gd = gd::GoodDataClient::new(connector, token);
+    let gd = gd::GoodDataClient::new(connector, token, None, None);
     assert_eq!(gd.token.is_some(), true);
     assert_eq!(gd.projects.is_some(), false);
     assert_eq!(gd.user.is_some(), false);

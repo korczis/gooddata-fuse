@@ -99,6 +99,13 @@ impl Project {
         self.get_metadata_objects::<T>(client, T::root_key().to_string(), force_update)
     }
 
+    pub fn attributes(&self,
+                      client: &mut Connector,
+                      force_update: bool)
+                      -> MetadataQuery<MetadataQueryBody<metadata::attribute::Attribute>> {
+        self.metadata::<metadata::attribute::Attribute>(client, force_update)
+    }
+
     pub fn facts(&self,
                  client: &mut Connector,
                  force_update: bool)
