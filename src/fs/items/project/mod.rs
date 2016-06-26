@@ -68,9 +68,6 @@ pub fn getattr(fs: &mut GoodDataFS, req: &Request, ino: u64, reply: ReplyAttr) {
                 (metadata::ITEM.getattr)(fs, req, ino, reply)
             }
             x if x == constants::Category::MetadataAttributes as u8 => {
-                (metadata::attributes::ITEM.getattr)(fs, req, ino, reply)
-            }
-            x if x == constants::Category::MetadataAttributes as u8 => {
                 if inode.reserved == constants::ReservedFile::KeepMe as u8 {
                     (metadata::attributes::ITEM.getattr)(fs, req, ino, reply)
                 } else if inode.reserved == 0 {
