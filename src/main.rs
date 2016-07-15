@@ -7,11 +7,16 @@ extern crate clap;
 extern crate gooddata_fs;
 extern crate users;
 
+extern crate serde;
+extern crate serde_json;
+
 use clap::{Arg, App};
 
 use std::process::exit;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+// use std::time::Duration;
+// use std::thread;
 
 use gooddata_fs::*;
 
@@ -26,6 +31,14 @@ fn main() {
         r.store(false, Ordering::SeqCst);
         exit(0);
     });
+
+    // thread::spawn(move || {
+    //     // some work here
+    //     loop {
+    //         print!(".");
+    //         thread::sleep(Duration::from_millis(1000))
+    //     }
+    // });
 
     // Specify program options
     let matches = App::new(DESCRIPTION)
