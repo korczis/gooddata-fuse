@@ -11,6 +11,9 @@ use super::item;
 
 use std::path::Path;
 
+use regex::Regex;
+
+
 // TODO: This probably needs to be generated dynamically
 pub const PROJECTS_ITEMS: [item::ProjectItem; 0] = [];
 
@@ -46,7 +49,10 @@ pub fn lookup(fs: &mut GoodDataFS, _req: &Request, _parent: u64, name: &Path, re
                     .as_ref()
                     .unwrap();
 
-                if title == name.to_str().unwrap() {
+                let re = Regex::new("[^a-zA-Z0-9]+").unwrap();
+                let sanitized_title = re.replace_all(&title[..], "_");
+
+                if sanitized_title == name.to_str().unwrap() {
                     break;
                 }
                 i += 1;
@@ -87,8 +93,9 @@ pub fn readdir(fs: &mut GoodDataFS,
             reserved: 0,
         };
         info!("readdir() - Adding path {:?}, inode {:?}", title, inode);
-        // let sanitized = re.replace_all(&title[..], "_");
-        reply.add(ino, in_offset, FileType::Directory, title);
+        let re = Regex::new("[^a-zA-Z0-9]+").unwrap();
+        let sanitized = re.replace_all(&title[..], "_");
+        reply.add(ino, in_offset, FileType::Directory, sanitized);
         offset += 1;
     }
 
@@ -150,8 +157,13 @@ pub fn rmdir(fs: &mut GoodDataFS, name: &Path, reply: ReplyEmpty) {
 }
 
 fn find_project_by_title(projects: &Vec<Project>, title: &String) -> Option<Project> {
+    let re = Regex::new("[^a-zA-Z0-9]+").unwrap();
+    let sanitized_in = re.replace_all(&title[..], "_");
+
     for project in projects {
-        if project.project().meta().title().as_ref().unwrap() == title {
+        let sanitized_project =
+            re.replace_all(&project.project().meta().title().as_ref().unwrap()[..], "_");
+        if sanitized_project == sanitized_in {
             return Some(project.clone());
         }
     }
